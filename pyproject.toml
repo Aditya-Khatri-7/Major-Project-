@@ -1,7 +1,7 @@
 [tool.ruff]
 line-length = 150
 target-version = "py312"
-extend-exclude = ["venv", ".venv", "models", "data/raw", "data/processed"]
+extend-exclude = ["docs/_work", "venv", ".venv", "models", "data/raw", "data/processed"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W"]

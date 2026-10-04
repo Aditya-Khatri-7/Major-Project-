@@ -269,7 +269,8 @@
     const nameCell = h("td", { class: "name" }, name, h("small", { text: sub }));
     if (v.error) {
       const reason = String(v.explanation || "").replace(/^[A-Za-z]+(?:Error|Exception|Exceeded):\s*/, "").replace(/\{[\s\S]*$/, "").trim();
-      return h("tr", { class: "off" }, nameCell, h("td", { class: "reading", text: "Not used" }), h("td", { text: "-" }), h("td", { class: "remark", text: reason || "Unavailable for this case." }));
+      const friendly = /API_KEY is not set/i.test(reason) ? "No API key is configured for this reviewer." : reason;
+      return h("tr", { class: "off" }, nameCell, h("td", { class: "reading", text: "Not used" }), h("td", { text: "-" }), h("td", { class: "remark", text: friendly || "Unavailable for this case." }));
     }
     const reading = h("td", { class: "reading" },
       h("div", { class: "num" }, num(v.score), h("span", { text: " synthetic" })),
@@ -339,8 +340,8 @@
       r.evidence.length
         ? h("ul", { class: "refs" }, r.evidence.map((e) => h("li", {},
             h("div", { class: "ref-head" }, h("span", { text: EVIDENCE_KIND[e.evidence_type] || e.evidence_type }), h("code", { text: e.source_id }),
-              h("span", { text: `similarity ${num(e.similarity_score)}` }), e.verified ? h("span", { class: "chip neutral", text: `verified: ${e.label || "n/a"}` }) : null),
-            h("p", { text: e.content_snippet }))))
+              h("span", { text: `similarity ${num(e.similarity_score)}` }), e.verified ? h("span", { class: "chip neutral", text: `verified: ${e.label || "n/a"}` }) : (e.evidence_type === "case_study" ? h("span", { class: "chip neutral", text: "unverified, system-generated" }) : null)),
+            h("p", { text: String(e.content_snippet || "").replace(/^#+\s*/, "") }))))
         : h("p", { class: "disclaimer", text: "No supporting reference material was retrieved for this case." })));
 
     const status = h("p", { class: "done", "aria-live": "polite" });
@@ -368,5 +369,8 @@
   showEmpty();
   renderHistory();
   updateText();
-  loadHealth();
+  loadHealth().then(() => {
+    const requested = new URLSearchParams(location.search).get("case");      // /ui/?case=<job id> opens a stored case
+    if (requested && /^[0-9a-f-]{36}$/.test(requested)) openStored(requested);
+  });
 })();

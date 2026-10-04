@@ -37,3 +37,4 @@ eval/plots/
 models/*
 !models/calibration.json
 hf_cache/
+docs/_work/
