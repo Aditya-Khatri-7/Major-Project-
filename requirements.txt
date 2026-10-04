@@ -1,21 +1,25 @@
-# Runtime (API + pipeline). Install PyTorch first for your platform, e.g. for CUDA 12.1:
-#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
-langgraph>=0.2.60
-chromadb==0.5.20
-fastapi>=0.115.5
-uvicorn>=0.32.1
+# Runtime (API + pipeline). Install PyTorch first for your platform, e.g. for CUDA 12.x:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+# Ranges are the versions this project was developed and tested against (see requirements-tested.txt for exact pins).
+langgraph>=1.0,<2
+chromadb>=1.0,<2
+fastapi>=0.115
+uvicorn>=0.32
 python-multipart>=0.0.19
 pydantic>=2.10
 pydantic-settings>=2.6
-anthropic>=0.40.0
-sqlalchemy>=2.0.0
+anthropic>=0.40
+httpx>=0.27                  # Gemini judge adapter (agents/gemini_client.py)
+sqlalchemy>=2.0
 
-torch>=2.2.0
-torchvision>=0.17.0
-transformers>=4.44.0
-sentencepiece>=0.2.0
+torch>=2.2
+torchvision>=0.17
+transformers>=5.0,<6
+sentencepiece>=0.2
 protobuf>=4.25
-sentence-transformers>=3.0.0
-Pillow>=10.0.0
-numpy>=1.26.0,<2.0
-matplotlib>=3.7.0
+sentence-transformers>=3.0
+scikit-learn>=1.5            # needed at runtime: the CLIP probes are scikit-learn models loaded with joblib
+joblib>=1.3
+Pillow>=10.0
+numpy>=1.26
+matplotlib>=3.7

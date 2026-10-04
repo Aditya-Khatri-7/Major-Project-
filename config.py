@@ -43,6 +43,12 @@ class Settings(BaseSettings):
     jobs_dir: str = "./jobs"
     log_level: str = "INFO"
 
+    # --- API hardening ---
+    api_key: str = ""                  # if set, clients must send it as the X-API-Key header
+    rate_limit_per_min: int = 30       # per client address; 0 disables
+    job_retention_days: int = 0        # delete uploaded images / Grad-CAM older than this many days; 0 keeps everything
+    queue_timeout_s: int = 120         # how long a request waits for the single GPU slot before a 503
+
     # --- input limits ---
     min_text_words: int = 20
     max_text_words: int = 20000

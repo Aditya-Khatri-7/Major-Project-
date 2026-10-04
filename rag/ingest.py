@@ -95,6 +95,14 @@ def ingest_dir(kb_dir: Path, collection=None) -> int:
     return total
 
 
+def ensure_knowledge_base(kb_dir: Path = Path("rag/knowledge_base")) -> int:
+    """Populate the knowledge-base collection if it is empty (fresh container / new volume). Returns the chunk count."""
+    kb = get_kb()
+    if kb.count() == 0 and kb_dir.is_dir():
+        ingest_dir(kb_dir)
+    return kb.count()
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--kb-dir", type=Path)

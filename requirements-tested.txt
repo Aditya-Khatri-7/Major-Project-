@@ -1,0 +1,31 @@
+# Exact versions of the environment the results in FINAL_PROJECT_REPORT.md were produced with (Python 3.14, Windows, CUDA 13).
+# Use as a constraints file:  pip install -r requirements.txt -c requirements-tested.txt
+langgraph==1.2.12
+chromadb==1.5.9
+fastapi==0.139.2
+uvicorn==0.51.0
+python-multipart==0.0.32
+pydantic==2.13.4
+pydantic-settings==2.15.0
+anthropic==1.11.0
+httpx==0.28.1
+SQLAlchemy==2.1.1
+torch==2.14.0
+torchvision==0.29.0
+transformers==5.14.1
+tokenizers==0.22.2
+safetensors==0.8.0
+sentencepiece==0.2.2
+protobuf==7.35.1
+sentence-transformers==5.6.0
+scikit-learn==1.9.0
+joblib==1.5.3
+scipy==1.18.0
+pandas==2.3.3
+pillow==12.3.0
+numpy==2.5.1
+matplotlib==3.11.1
+streamlit==1.65.0
+requests==2.34.2
+pytest==9.1.1
+ruff==0.16.9

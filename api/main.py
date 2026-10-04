@@ -7,18 +7,39 @@ import threading
 import uuid
 from pathlib import Path
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from contextlib import asynccontextmanager
+
+from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 
 from agents.common import log
 from agents.schemas import initial_state
 from api.schemas import (AnalyzeResponse, CorrectionRequest, CorrectionResponse, EvidenceOut, TextRequest,
                          ToolVerdictOut)
+from api.security import purge_old_jobs, rate_limit, require_api_key
 from api.validation import InputRejected, validate_image_bytes, validate_text
 from config import settings
 from observability import log_event
 
-app = FastAPI(title="Forensics Agent API", version="2.0")
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    """Start-up housekeeping. Never blocks the API from starting."""
+    try:
+        purge_old_jobs()
+    except Exception as exc:
+        log_event(log, "startup_purge_failed", level=logging.WARNING, error=str(exc))
+    try:
+        from rag.ingest import ensure_knowledge_base
+        log_event(log, "knowledge_base_ready", chunks=ensure_knowledge_base())
+    except Exception as exc:
+        log_event(log, "knowledge_base_unavailable", level=logging.WARNING, error=f"{type(exc).__name__}: {exc}")
+    yield
+
+
+app = FastAPI(title="Forensics Agent API", version="2.1", lifespan=lifespan)
+PROTECTED = [Depends(require_api_key), Depends(rate_limit)]
 
 _UUID = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
 _pipeline_slot = threading.Semaphore(1)        # one job at a time: models share a single small GPU
@@ -37,12 +58,15 @@ def _job_id_or_404(job_id: str) -> str:
 
 
 def _run(state: dict) -> dict:
+    if not _pipeline_slot.acquire(timeout=settings.queue_timeout_s):
+        raise HTTPException(503, "The analysis queue is busy. Retry shortly.")
     try:
-        with _pipeline_slot:
-            return get_graph().invoke(state)
+        return get_graph().invoke(state)
     except Exception as exc:
         log_event(log, "pipeline_failed", level=logging.ERROR, job_id=state["job_id"], error=str(exc))
         raise HTTPException(500, "Analysis failed. See server logs for the job id.") from exc
+    finally:
+        _pipeline_slot.release()
 
 
 def _to_response(result: dict) -> AnalyzeResponse:
@@ -72,7 +96,7 @@ def _to_response(result: dict) -> AnalyzeResponse:
     )
 
 
-@app.post("/analyze/text", response_model=AnalyzeResponse)
+@app.post("/analyze/text", response_model=AnalyzeResponse, dependencies=PROTECTED)
 def analyze_text(req: TextRequest):
     try:
         text = validate_text(req.text)
@@ -82,7 +106,7 @@ def analyze_text(req: TextRequest):
     return _to_response(_run(state))
 
 
-@app.post("/analyze/image", response_model=AnalyzeResponse)
+@app.post("/analyze/image", response_model=AnalyzeResponse, dependencies=PROTECTED)
 def analyze_image(file: UploadFile = File(...)):
     limit = settings.max_image_mb * 1024 * 1024
     data = file.file.read(limit + 1)
@@ -98,7 +122,7 @@ def analyze_image(file: UploadFile = File(...)):
     return _to_response(_run(initial_state(job_id, "image", str(path))))
 
 
-@app.get("/jobs/{job_id}")
+@app.get("/jobs/{job_id}", dependencies=PROTECTED)
 def get_job(job_id: str):
     from evidence_store.models import get_record
 
@@ -108,7 +132,7 @@ def get_job(job_id: str):
     return record
 
 
-@app.get("/jobs/{job_id}/gradcam")
+@app.get("/jobs/{job_id}/gradcam", dependencies=PROTECTED)
 def get_gradcam(job_id: str):
     path = Path(settings.jobs_dir) / _job_id_or_404(job_id) / "gradcam.png"
     if not path.is_file():
@@ -116,7 +140,7 @@ def get_gradcam(job_id: str):
     return FileResponse(path, media_type="image/png")
 
 
-@app.post("/jobs/{job_id}/correction", response_model=CorrectionResponse)
+@app.post("/jobs/{job_id}/correction", response_model=CorrectionResponse, dependencies=PROTECTED)
 def correct_job(job_id: str, body: CorrectionRequest):
     from evidence_store.models import set_correction
     from rag.case_memory import apply_correction

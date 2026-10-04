@@ -8,9 +8,10 @@ services:
       dockerfile: Dockerfile.api
     env_file: .env
     environment:
-      TEXT_DL_MODEL_PATH: /app/models/text_dl
+      TEXT_DL_MODEL_PATH: /app/models/text_dl_v2
       IMAGE_MODEL_PATH: /app/models/efficientnet_b4.pt
       CALIBRATION_PATH: /app/models/calibration.json
+      # optional hardening: API_KEY, RATE_LIMIT_PER_MIN, JOB_RETENTION_DAYS (set them in .env)
     ports:
       - "8000:8000"
     volumes:
@@ -24,6 +25,7 @@ services:
       dockerfile: Dockerfile.frontend
     environment:
       FORENSICS_API_URL: http://api:8000
+      FORENSICS_API_KEY: ${API_KEY:-}
     ports:
       - "8501:8501"
     depends_on:

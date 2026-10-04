@@ -16,6 +16,7 @@ except ImportError:
     paste_image_button = None
 
 API_URL = os.getenv("FORENSICS_API_URL", "http://localhost:8000").rstrip("/")
+AUTH = {"X-API-Key": os.environ["FORENSICS_API_KEY"]} if os.getenv("FORENSICS_API_KEY") else {}
 COLORS = {"synthetic": "#d62728", "authentic": "#2ca02c", "uncertain": "#ff7f0e"}
 
 
@@ -30,7 +31,7 @@ def _post_error(exc: Exception) -> str:
 
 def submit_correction(job_id: str, label: str) -> None:
     try:
-        r = requests.post(f"{API_URL}/jobs/{job_id}/correction", json={"label": label}, timeout=30)
+        r = requests.post(f"{API_URL}/jobs/{job_id}/correction", json={"label": label}, headers=AUTH, timeout=30)
         r.raise_for_status()
         st.success(f"Recorded human label '{label}' for job {job_id[:8]}.")
     except Exception as exc:
@@ -60,7 +61,7 @@ def show_result(data: dict) -> None:
     if data.get("gradcam_url"):
         st.subheader("Where the detector looked (Grad-CAM)")
         try:
-            resp = requests.get(f"{API_URL}{data['gradcam_url']}", timeout=30)
+            resp = requests.get(f"{API_URL}{data['gradcam_url']}", headers=AUTH, timeout=30)
             resp.raise_for_status()
             st.image(resp.content, caption="Heatmap shows model attention, not a verified manipulation mask.")
         except Exception as exc:
@@ -114,7 +115,7 @@ with tab_text:
         else:
             with st.spinner("Running the agent pipeline..."):
                 try:
-                    r = requests.post(f"{API_URL}/analyze/text", json={"text": text_input}, timeout=180)
+                    r = requests.post(f"{API_URL}/analyze/text", json={"text": text_input}, headers=AUTH, timeout=180)
                     r.raise_for_status()
                     st.session_state["result"] = r.json()
                 except Exception as exc:
@@ -139,7 +140,7 @@ with tab_image:
     if image_bytes is not None and st.button("Analyse image", type="primary"):
         with st.spinner("Running the image pipeline..."):
             try:
-                r = requests.post(f"{API_URL}/analyze/image", timeout=300,
+                r = requests.post(f"{API_URL}/analyze/image", timeout=300, headers=AUTH,
                                   files={"file": (image_name, image_bytes, image_type)})
                 r.raise_for_status()
                 st.session_state["result"] = r.json()
