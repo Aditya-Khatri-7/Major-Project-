@@ -100,7 +100,7 @@ st.caption("Detects AI-generated text and deepfake images. Results are probabili
 try:
     health = requests.get(f"{API_URL}/health", timeout=5).json()
     if not health.get("llm_configured"):
-        st.warning("The API has no ANTHROPIC_API_KEY: LLM and vision-judge tools will be skipped.")
+        st.warning("The API has no judge key (GEMINI_API_KEY or ANTHROPIC_API_KEY): the LLM and vision-judge tools are skipped, local tools only.")
 except Exception:
     st.error(f"Cannot reach the API at {API_URL}. Start it with: uvicorn api.main:app")
     st.stop()

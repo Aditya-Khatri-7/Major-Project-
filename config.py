@@ -5,7 +5,14 @@ Unknown keys in `.env` are ignored, so adding variables never crashes start-up.
 """
 from __future__ import annotations
 
+import os
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Keep model downloads inside the project folder unless the user already chose a location (never the C: user profile).
+os.environ.setdefault("HF_HOME", str(Path(__file__).resolve().parent / "hf_cache"))
+os.environ.setdefault("TORCH_HOME", str(Path(__file__).resolve().parent / "hf_cache" / "torch"))
 
 
 def _split(csv: str) -> list[str]:

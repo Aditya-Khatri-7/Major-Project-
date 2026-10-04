@@ -3,7 +3,7 @@
 Everything except the actual training runs is already built and tested. This guide takes you from a clean
 machine to the paper's results table. Run every command from the `forensics-agent/` folder.
 
-Hardware assumed: RTX 3050 6 GB, 16 GB RAM. Keep big data and caches on **D:** (C: is small).
+Hardware used: RTX 5080 16 GB. Everything (data, models, caches) stays on **D:** inside this folder; downloads go to `hf_cache/` unless `HF_HOME` is set.
 
 ---
 
@@ -12,7 +12,7 @@ Hardware assumed: RTX 3050 6 GB, 16 GB RAM. Keep big data and caches on **D:** (
 ```powershell
 # environment (PyTorch already installed with CUDA; keep it)
 pip install -r requirements-dev.txt
-copy .env.example .env          # then put your ANTHROPIC_API_KEY in .env
+copy .env.example .env          # then put your GEMINI_API_KEY (or ANTHROPIC_API_KEY) in .env
 
 # keep model downloads off C: and make downloads tolerant of slow networks
 setx HF_HOME D:\hf_cache

@@ -21,3 +21,4 @@ tests/
 !README.md
 !rag/knowledge_base/*.md
 !rag/knowledge_base/**/*.md
+hf_cache/

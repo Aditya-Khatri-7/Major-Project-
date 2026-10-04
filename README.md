@@ -5,8 +5,9 @@ and escalates uncertain cases to a human.
 
 ```
 Client (Streamlit) -> FastAPI -> LangGraph
-   text:  DeBERTa classifier | Qwen Binoculars (SLM) | Claude judge (LLM)
-   image: EfficientNet-B4 + Grad-CAM | Claude Vision judge
+   text:  DeBERTa-v3 classifier | Qwen Binoculars (SLM) | LLM judge (Gemini or Claude)
+   image: scope guard -> face photo: EfficientNet-B4 + Grad-CAM, CLIP probe | other images: general CLIP probe
+          (+ vision-LLM judge)
    -> RAG (knowledge base + case memory, cited) -> verifier (calibrated fusion, disagreement check,
       one Reflexion retry, escalation) -> report -> evidence store (SHA-256 audit record)
 ```
@@ -18,7 +19,7 @@ Design decisions: [ARCHITECTURE.md](ARCHITECTURE.md), [DECISIONS.md](DECISIONS.m
 
 ```bash
 pip install -r requirements.txt            # PyTorch first for your CUDA version, see requirements.txt
-cp .env.example .env                       # add ANTHROPIC_API_KEY
+cp .env.example .env                       # add GEMINI_API_KEY (or ANTHROPIC_API_KEY); judges are optional
 python rag/ingest.py --kb-dir rag/knowledge_base
 uvicorn api.main:app --reload              # http://localhost:8000/docs
 streamlit run frontend/app.py              # http://localhost:8501
@@ -68,5 +69,6 @@ ruff check .
 
 ## Limits (be honest in the report)
 Detection is probabilistic and degrades on unseen generators, heavy compression and adversarial edits. Not in scope:
-distributed tracing, continuous evaluation, legal chain-of-custody, rate limiting/auth, load testing,
-prompt-injection red-teaming beyond the input-as-data hardening.
+distributed tracing, continuous evaluation, legal chain-of-custody, load testing,
+prompt-injection red-teaming beyond the input-as-data hardening. Basic API protection (optional API key, rate limit,
+upload retention) is built in; see `.env.example`.
