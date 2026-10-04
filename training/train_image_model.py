@@ -93,7 +93,7 @@ class SelfBlend:
     """
 
     def __call__(self, img: Image.Image) -> Image.Image:
-        from PIL import ImageChops, ImageEnhance
+        from PIL import ImageEnhance
         img = img.convert("RGB")
         w, h = img.size
         fg = img.copy()

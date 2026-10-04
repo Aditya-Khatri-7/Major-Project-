@@ -32,3 +32,8 @@ eval/plots/
 *.joblib
 *.safetensors
 *.npz
+
+# keep the small frozen calibration file under version control
+!models/
+models/*
+!models/calibration.json

@@ -9,8 +9,6 @@ Test-id frames are never added. Files are hard links (no extra disk).
 from __future__ import annotations
 
 import argparse
-import os
-import shutil
 import sys
 from pathlib import Path
 

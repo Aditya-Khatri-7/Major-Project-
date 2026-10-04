@@ -1,0 +1,48 @@
+{
+  "text_dl": {
+    "temperature": 1.5562202181699365
+  },
+  "text_slm": {
+    "a": -7.137182785322018,
+    "b": 6.985524466216201,
+    "calibrated": true
+  },
+  "image_dl": {
+    "temperature": 0.7824018346022823
+  },
+  "image_clip": {
+    "temperature": 1.0154177671543105
+  },
+  "image_general": {
+    "temperature": 1.0,
+    "note": "uncalibrated; weight=2*(held-out GRAVEX AUC 0.94-0.5)"
+  },
+  "weights": {
+    "text_dl": 0.9893546666666666,
+    "text_slm": 0.5119466666666668,
+    "text_llm": 1.0,
+    "image_dl": 0.9582550000000001,
+    "image_clip": 0.7784859999999996,
+    "image_general": 0.88,
+    "image_vlm": 1.0
+  },
+  "thresholds": {
+    "text": {
+      "t_lo": 0.6064672385474118,
+      "t_hi": 0.7064672385474119,
+      "t_star": 0.6564672385474118
+    },
+    "image": {
+      "t_lo": 0.3517098513588068,
+      "t_hi": 0.503835519506948,
+      "t_star": 0.40170985135880677
+    }
+  },
+  "spread_threshold": 0.35,
+  "min_tool_confidence": 0.15,
+  "calibrated_at": "2026-10-04T10:56:12.379793+00:00",
+  "calibrated_modalities": [
+    "image",
+    "text"
+  ]
+}

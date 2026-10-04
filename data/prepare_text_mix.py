@@ -11,7 +11,6 @@ raid_unseen_attack.csv
 from __future__ import annotations
 
 import hashlib
-import random
 import sys
 from pathlib import Path
 

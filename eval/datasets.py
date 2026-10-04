@@ -2,13 +2,13 @@
 from __future__ import annotations
 
 import csv
-import sys
-
-csv.field_size_limit(min(sys.maxsize, 2**31 - 1))
 import hashlib
 import random
+import sys
 from pathlib import Path
 from typing import Optional
+
+csv.field_size_limit(min(sys.maxsize, 2**31 - 1))
 
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 CALIB_PERCENT = 40      # share of the image `valid/` folder reserved for calibration (not used for early stopping)

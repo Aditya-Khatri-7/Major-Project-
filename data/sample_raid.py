@@ -2,7 +2,8 @@
 
 All human rows are kept at HUMAN_FRAC, machine rows at `frac`. source_id is kept so we can split by document.
 """
-import sys, pandas as pd
+import sys
+import pandas as pd
 src, dst, frac = sys.argv[1], sys.argv[2], float(sys.argv[3])
 HUMAN_FRAC = 0.3
 parts = []

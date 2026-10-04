@@ -33,8 +33,8 @@ def get_scorer(modality: str, key: str):
     if modality == "text":
         from agents.text_agent.tools import dl_classifier, llm_judge, slm_binoculars
         return {"dl": dl_classifier.score_text, "slm": slm_binoculars.score_text, "llm": llm_judge.score_text}[key]
-    from agents.image_agent.tools import clip_probe, dl_classifier, vlm_judge
-    return {"dl": lambda p: dl_classifier.score_image(p, with_gradcam=False), "clip": clip_probe.score_image,
+    from agents.image_agent.tools import clip_probe, dl_classifier, general_probe, vlm_judge
+    return {"dl": lambda p: dl_classifier.score_image(p, with_gradcam=False), "clip": clip_probe.score_image, "general": general_probe.score_image,
             "vlm": vlm_judge.score_image}[key]
 
 
