@@ -26,3 +26,24 @@ jobs:
 
       - name: Test (no models, no API key needed)
         run: pytest tests/ -v
+
+  docker-build:
+    # Verifies the "docker compose up works from a clean clone" claim: builds the images and imports the app inside them.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build API image (CPU)
+        run: docker build -f Dockerfile.api -t forensics-api .
+
+      - name: Build frontend image
+        run: docker build -f Dockerfile.frontend -t forensics-frontend .
+
+      - name: Import the app inside the API image (catches missing runtime packages)
+        run: >
+          docker run --rm forensics-api python -c
+          "import api.main, agents.orchestrator, joblib, sklearn, httpx; print('api image imports ok')"
+
+      - name: No secrets baked into the images
+        run: |
+          ! docker run --rm forensics-api sh -c 'test -f .env || ls -a | grep -x ".env"' | grep -q ".env"

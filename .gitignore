@@ -22,7 +22,6 @@ hf_cache/
 # local artifacts (added at repo init)
 logs/
 evidence_store/*.db
-demo_samples/
 tmp_scripts/
 eval/cache/
 eval/plots/
