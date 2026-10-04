@@ -58,3 +58,21 @@ def test_provider_switch_selects_key_and_model(monkeypatch):
     assert settings.llm_configured and settings.judge_model_id == settings.gemini_model_id
     monkeypatch.setattr(settings, "llm_provider", "anthropic")
     assert not settings.llm_configured
+
+
+def test_daily_quota_fails_fast_and_blocks_further_calls(monkeypatch):
+    from agents.gemini_client import GeminiClient, GeminiQuotaExceeded
+    monkeypatch.setattr(GeminiClient, "_blocked_until", 0.0)
+    calls = {"n": 0}
+
+    def handler(request):
+        calls["n"] += 1
+        return httpx.Response(429, json={"error": {"details": [{"retryDelay": "37545s"}]}}, text="PerDay")
+
+    client = GeminiClient("k", max_retries=5, transport=httpx.MockTransport(handler))
+    with pytest.raises(GeminiQuotaExceeded):
+        client.messages.create(model="m", max_tokens=10, system="s", messages=MSG)
+    with pytest.raises(GeminiQuotaExceeded):                       # second call never reaches the network
+        client.messages.create(model="m", max_tokens=10, system="s", messages=MSG)
+    assert calls["n"] == 1
+    monkeypatch.setattr(GeminiClient, "_blocked_until", 0.0)

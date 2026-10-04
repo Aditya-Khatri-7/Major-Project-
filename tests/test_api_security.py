@@ -74,3 +74,14 @@ def test_ensure_knowledge_base_populates_empty_collection(tmp_path, monkeypatch,
     assert ingest.ensure_knowledge_base() > 0
     n = store.get_kb().count()
     assert ingest.ensure_knowledge_base() == n                      # idempotent: does not re-ingest
+
+
+def test_web_ui_is_served_and_health_exposes_thresholds():
+    client = TestClient(main.app)
+    root = client.get("/", follow_redirects=False)
+    assert root.status_code in (302, 307) and root.headers["location"] == "/ui/"
+    page = client.get("/ui/")
+    assert page.status_code == 200 and "Forensic Examination Desk" in page.text
+    assert client.get("/ui/app.js").status_code == 200 and client.get("/ui/styles.css").status_code == 200
+    bands = client.get("/health").json()["thresholds"]
+    assert 0 < bands["text"]["lo"] < bands["text"]["hi"] < 1 and 0 < bands["image"]["lo"] < bands["image"]["hi"] < 1

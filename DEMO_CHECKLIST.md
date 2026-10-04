@@ -4,9 +4,9 @@
 1. Open PowerShell in `D:\!Forensics agent`.
 2. `python -m pytest tests -q` -> expect `79 passed`.
 3. Terminal 1: `python -m uvicorn api.main:app --port 8000` (first request loads models, about 20-30 s; send one warm-up text first).
-4. Terminal 2: `python -m streamlit run frontend/app.py` -> http://localhost:8501.
+4. Open http://localhost:8000/ in the browser (the web interface is served by the API; no second terminal needed).
 5. Check http://localhost:8000/health shows `text_dl_model`, `image_dl_model`, `calibration_file` all true.
-   `llm_configured: false` is expected until a judge key is added; the warning banner in the app is normal.
+   The header of the page shows three status lights (service, instruments, model reviewer).
 
 ## Order of the demo (inputs are in `demo_samples/`)
 1. `text_human_written.txt` -> authentic. `text_AI_generated.txt` -> synthetic. Point at the per-tool breakdown and the cited sources.
@@ -19,7 +19,12 @@
 * GPU busy: close other GPU programs; the pipeline runs one job at a time (a second request gets HTTP 503, not a hang).
 * Anything with the judges: they are optional; leave `ENABLED_*_TOOLS` alone, the local tools carry the demo.
 
-## After adding the Gemini key (the one remaining task)
+## Gemini limits (important for the demo)
+The free-tier key allows only **20 requests per day per model**. Each text or image examination uses one judge call, so after about 20 examinations the
+"Model reviewer" returns "Not used" (daily quota exhausted) for the rest of the day. The system keeps working on the local instruments and the page says so
+in the Remarks column. To avoid surprises: do not run the judge smoke test or any batch scoring on the day of the demo, or enable billing on the key.
+
+## Gemini setup (already done on this machine)
 ```powershell
 copy .env.example .env      # then edit: GEMINI_API_KEY=...  LLM_PROVIDER=gemini
 python eval/smoke_judges.py # prints a verdict per demo input; exit code 0 = all four judge calls worked

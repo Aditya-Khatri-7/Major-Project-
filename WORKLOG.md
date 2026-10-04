@@ -160,4 +160,6 @@ Every step: what, why, result. Newest at the bottom.
 - Re-upload robustness test: AUC mostly survives, false alarms on real faces grow (FF++ up to 49%). Reported as a limitation.
 - Moved old checkpoints/experiments to `models/_archive/` (see docs/MODELS.md). Note: I previously called the duplicate homoglyph keys a bug; both
   repeats mapped to the same value, so it was harmless lint.
+- Gemini key added (4 Oct, evening). `eval/smoke_judges.py`: all four judge calls valid, but the vision judge scored the demo deepfake 0.05 (wrong, confidence 0.85). Calibration scoring then hit the free-tier cap (20 requests/day/model) and logged 101 quota errors; those records were moved to `eval/cache/_old/`, not used. Added fail-fast quota handling and conservative judge weights (0.3).
+- New web interface in `web/` served at `/` (replaces Streamlit for the demo). Tests now ignore the local `.env`.
 - Ran the real API end-to-end with the demo samples: 4/4 correct, citations present, Grad-CAM served.

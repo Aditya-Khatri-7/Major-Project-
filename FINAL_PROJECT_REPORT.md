@@ -184,8 +184,10 @@ Results tables: `eval/results/*.md`. Presentation script: `RESULTS_AND_PRESENTAT
   (for example non-native English, which the knowledge base flags as a known bias) were **not measured**: no such dataset was available.
 - **Celeb-DF and FF++ were in the training mix** (video-disjoint tests), so those scores are per-dataset, not zero-shot. The only true zero-shot
   image test is Face2Face / FaceShifter. FF++ is the C32 compression, not C23.
-- **Judges and Reflexion are not benchmarked.** The code, prompts, provider switch (Gemini or Claude) and tests exist; `python eval/smoke_judges.py`
-  verifies them once a key is set. Without a judge, face images with both local tools usable are still escalated when the fused score is in the
+- **Judges and Reflexion are not benchmarked.** The Gemini judges were run live on the four demo inputs (all returned valid verdicts): text AI 0.72, human 0.05;
+  vision judge 0.05 on both the deepfake and the real image, i.e. **it missed the deepfake with 85% confidence**. The free-tier key allows 20 requests per day
+  per model, which is exhausted by the smoke test, so calibration and the judge ablation rows could not be run. Judge weights are therefore set conservatively
+  (0.3, not fitted). With a billing-enabled key: score 400 calibration samples per modality, run `training/calibrate.py`, then the benchmarks. Without a judge, face images with both local tools usable are still escalated when the fused score is in the
   uncertain band.
 - Detection is probabilistic, not proof; adversarial edits reduce accuracy.
 

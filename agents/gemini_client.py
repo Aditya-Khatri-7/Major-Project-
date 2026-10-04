@@ -5,6 +5,7 @@ Talks to the Gemini REST API through httpx (no extra SDK). The judge code builds
 """
 from __future__ import annotations
 
+import re
 import time
 from types import SimpleNamespace
 
@@ -49,7 +50,25 @@ class _Messages:
         return SimpleNamespace(content=[SimpleNamespace(type="text", text=text)])
 
 
+class GeminiQuotaExceeded(RuntimeError):
+    """The daily / long-window quota is used up: retrying immediately is pointless."""
+
+
+def _retry_after_seconds(resp: httpx.Response) -> float:
+    """Seconds the API asks us to wait (0 if not stated)."""
+    try:
+        for detail in resp.json().get("error", {}).get("details", []):
+            m = re.fullmatch(r"([\d.]+)s", str(detail.get("retryDelay", "")))
+            if m:
+                return float(m.group(1))
+    except (ValueError, AttributeError):
+        pass
+    return 0.0
+
+
 class GeminiClient:
+    _blocked_until = 0.0            # shared by all instances: after a quota failure, skip calls until this monotonic time
+
     def __init__(self, api_key: str, max_retries: int = 5, timeout: float = 60.0, transport: httpx.BaseTransport | None = None):
         self._key = api_key
         self._retries = max_retries
@@ -58,9 +77,18 @@ class GeminiClient:
 
     def post(self, model: str, body: dict) -> dict:
         url = f"{API_ROOT}/{model or settings.gemini_model_id}:generateContent"
+        wait = GeminiClient._blocked_until - time.monotonic()
+        if wait > 0:
+            raise GeminiQuotaExceeded(f"Gemini quota exhausted; not calling the API for another {wait / 60:.0f} min.")
         delay = 1.0
         for attempt in range(self._retries + 1):
             resp = self._http.post(url, json=body, headers={"x-goog-api-key": self._key})
+            if resp.status_code == 429:
+                retry_after = _retry_after_seconds(resp)
+                if retry_after > 60 or "PerDay" in resp.text:
+                    # short cool-off so the next live request does not pay for another doomed call; re-test after 10 minutes at most
+                    GeminiClient._blocked_until = time.monotonic() + min(retry_after or 600.0, 600.0)
+                    raise GeminiQuotaExceeded(f"Gemini daily quota exhausted (retry in {retry_after / 3600:.1f} h).")
             if resp.status_code in RETRY_STATUS and attempt < self._retries:
                 time.sleep(delay)
                 delay = min(delay * 2, 20.0)

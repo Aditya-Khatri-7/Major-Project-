@@ -10,7 +10,8 @@ from pathlib import Path
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 
 from agents.common import log
 from agents.schemas import initial_state
@@ -156,12 +157,28 @@ def correct_job(job_id: str, body: CorrectionRequest):
     return CorrectionResponse(job_id=job_id, label=body.label, case_memory_updated=updated)
 
 
+WEB_DIR = Path(__file__).resolve().parent.parent / "web"
+
+
+@app.get("/", include_in_schema=False)
+def home():
+    return RedirectResponse("/ui/")
+
+
 @app.get("/health")
 def health():
+    from agents.calibration import load_calibration
+
+    bands = load_calibration()["thresholds"]
     return {
+        "thresholds": {m: {"lo": bands[m]["t_lo"], "hi": bands[m]["t_hi"]} for m in bands},
         "status": "ok",
         "llm_configured": settings.llm_configured,
         "text_dl_model": Path(settings.text_dl_model_path, "config.json").exists(),
         "image_dl_model": Path(settings.image_model_path).exists(),
         "calibration_file": Path(settings.calibration_path).exists(),
     }
+
+
+if WEB_DIR.is_dir():
+    app.mount("/ui", StaticFiles(directory=WEB_DIR, html=True), name="ui")

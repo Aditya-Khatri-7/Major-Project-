@@ -62,3 +62,14 @@ def fake_embeddings():
     store.set_embedding_function(HashEmbedding())
     yield
     store.reset_clients()
+
+
+@pytest.fixture(autouse=True)
+def _isolate_from_local_env(monkeypatch):
+    """Tests must not depend on a developer's .env (real API keys, provider, access key)."""
+    from config import settings
+
+    monkeypatch.setattr(settings, "llm_provider", "anthropic")
+    monkeypatch.setattr(settings, "anthropic_api_key", "")
+    monkeypatch.setattr(settings, "gemini_api_key", "")
+    monkeypatch.setattr(settings, "api_key", "")

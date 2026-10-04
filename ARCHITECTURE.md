@@ -12,7 +12,7 @@ reason in [DECISIONS.md](DECISIONS.md). Measured results: [FINAL_PROJECT_REPORT.
 ## 1. Pipeline
 
 ```
-Client (Streamlit)
+Client (web interface in web/, served by the API at /; Streamlit client optional)
    |  POST /analyze/text {text}        POST /analyze/image (multipart upload)
    v
 FastAPI   key check -> rate limit -> validate (type by content, size, dimensions, length) -> job id -> queue slot (503 if busy)

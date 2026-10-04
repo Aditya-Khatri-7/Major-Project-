@@ -20,11 +20,11 @@
   "weights": {
     "text_dl": 0.9893546666666666,
     "text_slm": 0.1,
-    "text_llm": 1.0,
+    "text_llm": 0.3,
     "image_dl": 0.9582550000000001,
     "image_clip": 0.7784859999999996,
     "image_general": 0.88,
-    "image_vlm": 1.0
+    "image_vlm": 0.3
   },
   "thresholds": {
     "text": {
@@ -44,5 +44,6 @@
   "calibrated_modalities": [
     "image",
     "text"
-  ]
+  ],
+  "judge_weights_note": "text_llm / image_vlm are NOT fitted: set to 0.3 (just above the advisory cut-off) until the judges are scored on calibration data."
 }

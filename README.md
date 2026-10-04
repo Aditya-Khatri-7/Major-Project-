@@ -22,7 +22,8 @@ pip install -r requirements.txt            # PyTorch first for your CUDA version
 cp .env.example .env                       # add GEMINI_API_KEY (or ANTHROPIC_API_KEY); judges are optional
 python rag/ingest.py --kb-dir rag/knowledge_base
 uvicorn api.main:app --reload              # http://localhost:8000/docs
-streamlit run frontend/app.py              # http://localhost:8501
+# web interface: http://localhost:8000/  (served by the API itself from web/)
+streamlit run frontend/app.py              # optional legacy Streamlit client, http://localhost:8501
 ```
 The local models (text classifier, image classifier, calibration) come from the training guide; until they exist the
 corresponding tools report an error verdict and the pipeline continues with the remaining tools.

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Forensic Examination Desk</title>
+  <meta name="description" content="Examination of text and images for signs of AI generation or manipulation.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231f3a5f'/%3E%3Cpath d='M9 9h14v3H13v4h8v3h-8v5H9z' fill='%23fff'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="masthead">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" fill="none" stroke="#fff" stroke-width="1.5"/><path d="M10 9h13v3h-9v4h7v3h-7v5h-4z" fill="#fff"/></svg>
+      <div>
+        <div class="brand-name">Forensic Examination Desk</div>
+        <div class="brand-sub">Analysis of text and images for signs of AI generation</div>
+      </div>
+    </div>
+    <div class="status" id="status" aria-live="polite">
+      <span><i class="dot" id="dot-api"></i><span id="st-api">Connecting</span></span>
+      <span><i class="dot" id="dot-models"></i><span id="st-models">Instruments</span></span>
+      <span><i class="dot" id="dot-judge"></i><span id="st-judge">Reviewer</span></span>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <aside class="intake" aria-labelledby="intake-h">
+      <h2 class="section-label" id="intake-h">Submit material</h2>
+      <div class="panel">
+        <div class="tabs" role="tablist" aria-label="Type of material">
+          <button class="tab" role="tab" id="tab-text" aria-selected="true" aria-controls="pane-text">Text</button>
+          <button class="tab" role="tab" id="tab-image" aria-selected="false" aria-controls="pane-image" tabindex="-1">Image</button>
+        </div>
+
+        <div id="pane-text" role="tabpanel" aria-labelledby="tab-text">
+          <label class="sr-only" for="text-input">Text to examine</label>
+          <textarea id="text-input" placeholder="Paste the text to be examined. At least 20 words are required; longer passages give firmer results." spellcheck="false"></textarea>
+          <div class="field-foot"><span id="word-count">0 words</span><span id="word-hint">Minimum 20 words</span></div>
+          <div class="actions">
+            <button class="btn" id="run-text" disabled>Run examination</button>
+            <button class="btn secondary" id="clear-text" type="button">Clear</button>
+          </div>
+        </div>
+
+        <div id="pane-image" role="tabpanel" aria-labelledby="tab-image" hidden>
+          <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Choose an image file, drop one here, or paste from the clipboard">
+            <strong>Select, drop or paste an image</strong>
+            <small>JPEG, PNG or WebP, up to 10 MB. Press Ctrl+V to paste a screenshot.</small>
+          </div>
+          <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" hidden>
+          <div class="preview" id="preview" hidden>
+            <img id="preview-img" alt="Selected image">
+            <dl>
+              <dt>File</dt><dd id="pv-name"></dd>
+              <dt>Size</dt><dd id="pv-size"></dd>
+              <dt>Dimensions</dt><dd id="pv-dim"></dd>
+            </dl>
+          </div>
+          <div class="actions">
+            <button class="btn" id="run-image" disabled>Run examination</button>
+            <button class="btn secondary" id="clear-image" type="button">Remove</button>
+          </div>
+        </div>
+
+        <p class="fineprint">Findings are statistical indications, not proof. Uncertain or conflicting results are referred for human review, and every case is kept as an audit record.</p>
+        <div class="key-bar" id="key-bar" hidden>
+          <input type="password" id="key-input" placeholder="Access key" autocomplete="off" aria-label="Access key">
+          <button class="btn small" id="key-save" type="button">Save</button>
+        </div>
+      </div>
+
+      <div class="history">
+        <h2 class="section-label">Recent cases</h2>
+        <ol id="history-list"></ol>
+      </div>
+    </aside>
+
+    <section class="findings" aria-labelledby="findings-h" aria-live="polite">
+      <h2 class="section-label" id="findings-h">Findings</h2>
+      <div id="view"></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
