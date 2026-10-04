@@ -1,4 +1,4 @@
-from agents.calibration import DEFAULTS
+from agents.calibration import DEFAULTS, load_calibration
 from agents.fusion import fuse, length_factor
 from tests.conftest import make_verdict
 
@@ -69,3 +69,18 @@ def test_learned_weights_shift_fused_score():
     c["weights"] = {"text_dl": 0.05, "text_llm": 1.0}
     light = fuse(v, "text", 200, c).fused
     assert heavy > light
+
+
+def test_low_weight_advisory_tool_does_not_trigger_disagreement():
+    cfg = load_calibration()
+    cfg = {**cfg, "weights": {**cfg["weights"], "text_dl": 1.0, "text_slm": 0.1}, "spread_min_weight": 0.3}
+    r = fuse([make_verdict("text_dl", 0.97, 0.9), make_verdict("text_slm", 0.2, 0.9)], "text", 200, cfg)
+    assert r.spread == 0.0 and not r.needs_reflexion
+    assert r.verdict == "synthetic" and not r.escalate
+    assert any("Advisory tool text_slm" in n for n in r.notes)
+
+
+def test_two_weighted_tools_still_trigger_disagreement():
+    cfg = {**load_calibration(), "spread_min_weight": 0.3}
+    r = fuse([make_verdict("text_dl", 0.95, 0.9), make_verdict("text_llm", 0.1, 0.9)], "text", 200, cfg)
+    assert r.spread > 0.35 and r.needs_reflexion and r.escalate

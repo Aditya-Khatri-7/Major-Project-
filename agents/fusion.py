@@ -59,8 +59,15 @@ def fuse(verdicts: list[ToolVerdict], modality: str, n_words: int = 0, cfg: Opti
     }
     total = sum(weights.values())
     fused = sum(weights[v.tool_name] * v.score for v in usable) / total
-    scores = [v.score for v in usable]
+    # Disagreement is judged among tools that carry real weight; advisory (low-weight) tools are only mentioned.
+    min_w = float(cfg.get("spread_min_weight", 0.0))
+    voters = [v for v in usable if cfg["weights"].get(v.tool_name, 1.0) >= min_w]
+    advisory = [v for v in usable if v not in voters]
+    scores = [v.score for v in voters]
     spread = (max(scores) - min(scores)) if len(scores) > 1 else 0.0
+    for v in advisory:
+        if abs(v.score - fused) > spread_limit:
+            notes.append(f"Advisory tool {v.tool_name} (low weight) disagrees: {v.score:.2f} vs fused {fused:.2f}.")
 
     if fused >= th["t_hi"]:
         verdict = "synthetic"
@@ -75,12 +82,14 @@ def fuse(verdicts: list[ToolVerdict], modality: str, n_words: int = 0, cfg: Opti
         confidence -= 0.15
         notes.append(
             f"High inter-tool disagreement (spread={spread:.2f}): "
-            + ", ".join(f"{v.tool_name}={v.score:.2f}" for v in usable) + "."
+            + ", ".join(f"{v.tool_name}={v.score:.2f}" for v in voters) + "."
         )
     confidence = max(0.0, min(0.95, confidence))
 
     if len(usable) < 2:
         notes.append("Fewer than two usable tools; verdict rests on a single detector.")
+    elif len(voters) < 2:
+        notes.append("Only one weighted tool; the others are advisory.")
     if verdict == "uncertain":
         notes.append("Fused score lies inside the uncertain band.")
 

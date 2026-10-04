@@ -148,12 +148,12 @@
         ]
       },
       "selective": {
-        "coverage": 0.251,
-        "escalation_rate": 0.749,
-        "accuracy_on_decided": 0.9561752988047809,
-        "accuracy_on_escalated": 0.9132176234979973,
-        "n_decided": 251,
-        "n_escalated": 749
+        "coverage": 0.477,
+        "escalation_rate": 0.523,
+        "accuracy_on_decided": 0.9580712788259959,
+        "accuracy_on_escalated": 0.892925430210325,
+        "n_decided": 477,
+        "n_escalated": 523
       },
       "verdict_counts": {
         "authentic": 463,

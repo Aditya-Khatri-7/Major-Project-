@@ -145,3 +145,19 @@ Every step: what, why, result. Newest at the bottom.
   | celebdf | 0.999 | 0.924 | 0.998 |
 - Net: unseen-manipulation AUC 0.755 -> ~0.79 (+0.035) at a cost of <=0.003 AUC on seen sets. Zero-shot generalisation is
   improved but NOT solved; remains a documented limitation. The Claude VLM judge (needs API key) is the remaining lever.
+
+## Session 3 (4 Oct 2026): audit and hardening
+- Put the project under git; pushed to `main` and `Aditya-Khatri` of github.com/Aditya-Khatri-7/Major-Project-. Large artefacts (data, models, caches) stay local.
+- Image calibration was stale (fitted to the retired CLIP probe). Re-scored the 2000-image calibration split and the four held-out sets, refit
+  (thresholds 0.35 / 0.50), reran benchmarks. Fused AUC: WD 0.977, FF++ seen 0.976, Celeb-DF 0.999, FF++ unseen 0.794.
+- Text: scored five held-out sets (1000 each) with the real tools. Binoculars never improved fused AUC (-0.001 to -0.006), so its weight is
+  capped at 0.10 (`--weight-cap`). Found that the weak tool still triggered the disagreement rule (75% escalation on MAGE); tools with weight
+  < 0.3 are now advisory -> escalation 30-52%, accuracy on decided cases 92-99.6%.
+- Verdict logic: non-face images use the general probe as the designated sole detector (no forced escalation when decisive).
+- Added a Gemini judge adapter (REST/httpx, `LLM_PROVIDER`), not exercised with a real key yet (`eval/smoke_judges.py`).
+- API: optional key, rate limit, 503 on busy queue, opt-in retention, knowledge base auto-ingest. Requirements fixed (scikit-learn/joblib/httpx were
+  missing from runtime deps), compose points at text_dl_v2, CI now builds both Docker images. Lint clean; 79 tests.
+- Re-upload robustness test: AUC mostly survives, false alarms on real faces grow (FF++ up to 49%). Reported as a limitation.
+- Moved old checkpoints/experiments to `models/_archive/` (see docs/MODELS.md). Note: I previously called the duplicate homoglyph keys a bug; both
+  repeats mapped to the same value, so it was harmless lint.
+- Ran the real API end-to-end with the demo samples: 4/4 correct, citations present, Grad-CAM served.

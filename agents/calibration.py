@@ -26,6 +26,7 @@ DEFAULTS: dict = {
         "image": {"t_lo": 0.35, "t_hi": 0.65, "t_star": 0.5},
     },
     "spread_threshold": 0.35,
+    "spread_min_weight": 0.3,        # tools with a lower fusion weight are advisory: they do not trigger disagreement/escalation
     "min_tool_confidence": 0.15,
 }
 
