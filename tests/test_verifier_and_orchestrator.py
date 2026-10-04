@@ -117,3 +117,23 @@ def test_graph_runs_reflexion_once_then_reports_and_persists(stub_graph):
     record = get_record("11111111-1111-4111-8111-111111111111")
     assert record["final_verdict"] == "synthetic" and len(record["tool_verdicts"]) == 2
     assert len(record["input_hash"]) == 64 and "word word" not in str(record["input_meta"])
+
+
+def _image_state(*verdicts):
+    s = initial_state("job-img", "image", "x.png")
+    s["tool_verdicts"] = list(verdicts)
+    return s
+
+
+def test_sole_general_probe_decisive_verdict_is_not_force_escalated():
+    out = verifier_agent.run_verifier(_image_state(make_verdict("image_general", 0.97, 0.9, modality="image")))
+    assert out["final_verdict"] == "synthetic" and out["escalate_to_human"] is False
+    assert out["final_confidence"] <= 0.8 and "designated detector" in out["verifier_notes"]
+
+
+def test_sole_general_probe_uncertain_or_weak_verdict_still_escalates():
+    out = verifier_agent.run_verifier(_image_state(make_verdict("image_general", 0.5, 0.9, modality="image")))
+    assert out["escalate_to_human"] is True
+    # a lone face-tool verdict is NOT a designated sole detector: still escalates
+    out = verifier_agent.run_verifier(_image_state(make_verdict("image_dl", 0.99, 0.9, modality="image")))
+    assert out["escalate_to_human"] is True

@@ -12,12 +12,15 @@ from config import settings
 from observability import log_event
 
 NEIGHBOUR_SIMILARITY = 0.85
+SOLE_DETECTOR_TOOLS = {"image_general"}      # the designated detector for out-of-scope (non-face) images
+SOLE_DETECTOR_MIN_CONFIDENCE = 0.5            # a lone detector must be this sure to skip the human review
+SOLE_DETECTOR_CONFIDENCE_CAP = 0.8
 
 
 def _judge_can_retry(state: ForensicState) -> bool:
     judge = JUDGE_TOOLS[state["modality"]]
     has_working_judge = any(v.tool_name == judge and not v.error for v in state["tool_verdicts"])
-    return has_working_judge and bool(settings.anthropic_api_key)
+    return has_working_judge and settings.llm_configured
 
 
 def run_verifier(state: ForensicState) -> dict:
@@ -26,7 +29,14 @@ def run_verifier(state: ForensicState) -> dict:
     result = fuse(state["tool_verdicts"], modality, n_words, retries=state.get("retries", 0))
 
     notes = list(result.notes)
-    verdict, escalate = result.verdict, result.escalate
+    verdict, escalate, confidence = result.verdict, result.escalate, result.confidence
+
+    # Non-face images: the face tools are skipped by design, so one detector is the intended configuration, not a failure.
+    if (len(result.usable) == 1 and result.usable[0] in SOLE_DETECTOR_TOOLS and verdict != "uncertain"
+            and confidence >= SOLE_DETECTOR_MIN_CONFIDENCE):
+        escalate = False
+        confidence = min(confidence, SOLE_DETECTOR_CONFIDENCE_CAP)
+        notes.append("Single designated detector for this image type; verdict is decisive, so no mandatory human review.")
 
     for ev in state.get("retrieved_evidence", []):
         if ev.evidence_type != "case_study" or not ev.verified or ev.similarity_score < NEIGHBOUR_SIMILARITY:
@@ -48,7 +58,7 @@ def run_verifier(state: ForensicState) -> dict:
     return {
         "fused_score": result.fused,
         "final_verdict": verdict,
-        "final_confidence": round(result.confidence, 4),
+        "final_confidence": round(confidence, 4),
         "escalate_to_human": escalate,
         "verifier_notes": " | ".join(notes) if notes else "Tools in agreement.",
         "needs_reflexion": needs_reflexion,

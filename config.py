@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     anthropic_api_key: str = ""
     llm_model_id: str = "claude-sonnet-5-5"
     llm_max_retries: int = 5
+    llm_provider: str = "anthropic"                  # "anthropic" or "gemini": which API the judge tools call
+    gemini_api_key: str = ""
+    gemini_model_id: str = "gemini-2.5-flash"
 
     # --- local models ---
     text_dl_model_path: str = "models/text_dl_v2"              # directory (HF format); v2 = DeBERTa-v3-base on the HC3+MAGE+RAID mix
@@ -47,6 +50,18 @@ class Settings(BaseSettings):
     max_image_side_px: int = 4096
 
     @property
+    def llm_api_key(self) -> str:
+        return self.gemini_api_key if self.llm_provider.lower() == "gemini" else self.anthropic_api_key
+
+    @property
+    def llm_configured(self) -> bool:
+        return bool(self.llm_api_key)
+
+    @property
+    def judge_model_id(self) -> str:
+        return self.gemini_model_id if self.llm_provider.lower() == "gemini" else self.llm_model_id
+
+    @property
     def text_tools(self) -> list[str]:
         return _split(self.enabled_text_tools)
 
@@ -59,10 +74,11 @@ settings = Settings()
 
 
 def require_api_key() -> str:
-    """Return the Anthropic key, or raise a clear error. Called only when an LLM tool runs."""
-    if not settings.anthropic_api_key:
+    """Return the key of the configured judge provider, or raise a clear error. Called only when an LLM tool runs."""
+    if not settings.llm_api_key:
+        name = "GEMINI_API_KEY" if settings.llm_provider.lower() == "gemini" else "ANTHROPIC_API_KEY"
         raise RuntimeError(
-            "ANTHROPIC_API_KEY is not set. Add it to .env (see .env.example) or disable the "
+            f"{name} is not set. Add it to .env (see .env.example) or disable the "
             "LLM tools via ENABLED_TEXT_TOOLS / ENABLED_IMAGE_TOOLS."
         )
-    return settings.anthropic_api_key
+    return settings.llm_api_key

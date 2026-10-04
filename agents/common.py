@@ -38,7 +38,7 @@ def model_versions() -> dict:
     calibration = Path(settings.calibration_path)
     cal_hash = hashlib.sha256(calibration.read_bytes()).hexdigest()[:12] if calibration.exists() else None
     return {
-        "llm": settings.llm_model_id,
+        "llm": f"{settings.llm_provider}:{settings.judge_model_id}",
         "text_dl": settings.text_dl_model_path,
         "slm_observer": settings.slm_observer_model,
         "slm_performer": settings.slm_performer_model,

@@ -136,7 +136,7 @@ def correct_job(job_id: str, body: CorrectionRequest):
 def health():
     return {
         "status": "ok",
-        "llm_configured": bool(settings.anthropic_api_key),
+        "llm_configured": settings.llm_configured,
         "text_dl_model": Path(settings.text_dl_model_path, "config.json").exists(),
         "image_dl_model": Path(settings.image_model_path).exists(),
         "calibration_file": Path(settings.calibration_path).exists(),

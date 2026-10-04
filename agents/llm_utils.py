@@ -77,8 +77,12 @@ def parse_judge_output(raw_text: str) -> JudgeOutput:
 
 @lru_cache(maxsize=1)
 def get_client():
+    key = require_api_key()
+    if settings.llm_provider.lower() == "gemini":
+        from agents.gemini_client import GeminiClient
+        return GeminiClient(api_key=key, max_retries=settings.llm_max_retries)
     import anthropic
-    return anthropic.Anthropic(api_key=require_api_key(), max_retries=settings.llm_max_retries)
+    return anthropic.Anthropic(api_key=key, max_retries=settings.llm_max_retries)
 
 
 def call_judge(system: str, content: list[dict], client=None, max_tokens: int = 500, attempts: int = 3) -> JudgeOutput:
@@ -93,7 +97,7 @@ def call_judge(system: str, content: list[dict], client=None, max_tokens: int = 
         sys_prompt = system if attempt == 0 else system + "\nIMPORTANT: reply with one raw JSON object and nothing else."
         try:
             response = client.messages.create(
-                model=settings.llm_model_id, max_tokens=max_tokens, system=sys_prompt,
+                model=settings.judge_model_id, max_tokens=max_tokens, system=sys_prompt,
                 messages=[{"role": "user", "content": content}], **kwargs,
             )
             raw = "".join(getattr(b, "text", "") for b in response.content if getattr(b, "type", "") == "text")

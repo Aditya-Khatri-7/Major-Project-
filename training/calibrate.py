@@ -69,8 +69,11 @@ def main() -> None:
     ap.add_argument("--plots-dir", type=Path, default=Path("eval/plots/calibration"))
     ap.add_argument("--target-precision", type=float, default=0.95)
     ap.add_argument("--target-npv", type=float, default=0.95)
+    ap.add_argument("--weight-cap", action="append", default=[], metavar="TOOL=MAX",
+                    help="cap a tool's fusion weight, e.g. text_slm=0.1 (a tool that lowers fused AUROC but adds an independent opinion)")
     args = ap.parse_args()
 
+    caps = {k: float(v) for k, v in (item.split("=") for item in args.weight_cap)}
     cache = load_cache(args.cache_dir, apply_calibration=False)
     print(f"Loaded {len(cache.samples)} samples; tools: {cache.tools}")
     cal = copy.deepcopy(load_calibration(str(args.output)))
@@ -127,7 +130,7 @@ def main() -> None:
     for tool in cache.tools:
         scores = np.array([0.5 if recal[i][tool].error else recal[i][tool].score for i in ids])
         auc = float(roc_auc_score(y_all, scores))
-        cal["weights"][tool] = max(0.05, 2.0 * (auc - 0.5))
+        cal["weights"][tool] = min(max(0.05, 2.0 * (auc - 0.5)), caps.get(tool, float("inf")))
         report["tools"].setdefault(tool, {}).update({"auroc": auc, "weight": cal["weights"][tool],
                                                      "errors": int(sum(recal[i][tool].error for i in ids))})
         print(f"  {tool}: AUROC={auc:.4f} -> weight {cal['weights'][tool]:.3f}")
