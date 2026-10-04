@@ -1,0 +1,34 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# large / generated artifacts
+models/
+chroma_data/
+jobs/
+state/
+data/raw/
+data/processed/
+eval/cache/
+*.db
+*.tmp
+hf_cache/
+
+# local artifacts (added at repo init)
+logs/
+evidence_store/*.db
+demo_samples/
+tmp_scripts/
+eval/cache/
+eval/plots/
+.ruff_cache/
+.pytest_cache/
+*.pt
+*.joblib
+*.safetensors
+*.npz

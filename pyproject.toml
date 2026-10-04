@@ -1,0 +1,12 @@
+[tool.ruff]
+line-length = 150
+target-version = "py312"
+extend-exclude = ["venv", ".venv", "models", "data/raw", "data/processed"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+ignore = ["E701", "E702"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

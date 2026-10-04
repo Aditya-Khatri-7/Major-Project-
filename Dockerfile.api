@@ -1,0 +1,20 @@
+# API image. CPU build by default; for a GPU build see docker-compose.gpu.yml (uses a CUDA PyTorch index).
+FROM python:3.12-slim
+
+ARG TORCH_INDEX=https://download.pytorch.org/whl/cpu
+ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 HF_HOME=/app/state/hf_cache
+
+WORKDIR /app
+RUN pip install torch torchvision --index-url ${TORCH_INDEX}
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+RUN useradd --create-home --uid 1000 appuser && mkdir -p /app/state && chown -R appuser /app
+COPY --chown=appuser . .
+USER appuser
+
+# Secrets and models are NOT baked in: pass env vars at run time and mount ./models read-only.
+ENV CHROMA_PERSIST_DIR=/app/state/chroma EVIDENCE_DB_URL=sqlite:////app/state/forensics.db JOBS_DIR=/app/state/jobs
+EXPOSE 8000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]

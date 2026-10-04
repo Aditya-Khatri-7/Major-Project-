@@ -1,0 +1,10 @@
+# Extra packages for training, calibration, evaluation and data preparation (on top of requirements.txt).
+scikit-learn>=1.5.0
+scipy>=1.11.0
+pandas>=2.0.0
+tqdm>=4.66.0
+datasets>=2.19.0
+huggingface_hub>=0.23.0
+opencv-python-headless>=4.9.0
+# Optional, better face detector for data/prepare_frames.py (install without dependencies so it
+# does not downgrade your PyTorch):   pip install facenet-pytorch --no-deps

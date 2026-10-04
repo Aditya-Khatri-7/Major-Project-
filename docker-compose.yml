@@ -1,0 +1,34 @@
+# CPU stack: API + Streamlit front end. Chroma runs in-process inside the API (persisted in the volume).
+# GPU: docker compose -f docker-compose.yml -f docker-compose.gpu.yml up --build
+# Put your trained models in ./models (mounted read-only) and your key in .env.
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    env_file: .env
+    environment:
+      TEXT_DL_MODEL_PATH: /app/models/text_dl
+      IMAGE_MODEL_PATH: /app/models/efficientnet_b4.pt
+      CALIBRATION_PATH: /app/models/calibration.json
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/app/models:ro
+      - app_state:/app/state
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    environment:
+      FORENSICS_API_URL: http://api:8000
+    ports:
+      - "8501:8501"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  app_state:

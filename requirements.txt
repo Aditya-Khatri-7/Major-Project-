@@ -1,0 +1,21 @@
+# Runtime (API + pipeline). Install PyTorch first for your platform, e.g. for CUDA 12.1:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+langgraph>=0.2.60
+chromadb==0.5.20
+fastapi>=0.115.5
+uvicorn>=0.32.1
+python-multipart>=0.0.19
+pydantic>=2.10
+pydantic-settings>=2.6
+anthropic>=0.40.0
+sqlalchemy>=2.0.0
+
+torch>=2.2.0
+torchvision>=0.17.0
+transformers>=4.44.0
+sentencepiece>=0.2.0
+protobuf>=4.25
+sentence-transformers>=3.0.0
+Pillow>=10.0.0
+numpy>=1.26.0,<2.0
+matplotlib>=3.7.0
