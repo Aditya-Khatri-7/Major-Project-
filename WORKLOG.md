@@ -163,3 +163,9 @@ Every step: what, why, result. Newest at the bottom.
 - Gemini key added (4 Oct, evening). `eval/smoke_judges.py`: all four judge calls valid, but the vision judge scored the demo deepfake 0.05 (wrong, confidence 0.85). Calibration scoring then hit the free-tier cap (20 requests/day/model) and logged 101 quota errors; those records were moved to `eval/cache/_old/`, not used. Added fail-fast quota handling and conservative judge weights (0.3).
 - New web interface in `web/` served at `/` (replaces Streamlit for the demo). Tests now ignore the local `.env`.
 - Ran the real API end-to-end with the demo samples: 4/4 correct, citations present, Grad-CAM served.
+
+## 5 Oct 2026: judge mini-run did not happen
+- The scheduled mini-run started at 08:57 IST (app opened late) but blocked on a tool-permission prompt nobody could answer; I stopped that session.
+- Running `eval/judge_minirun.py` directly at 09:05 IST failed on the first call: Gemini reported the daily quota exhausted again, retry in 20.4 h (next reset about 05:30 IST on 6 Oct).
+- No judge calls were made by this project between the 05:30 reset and that attempt, so something else is using the key's quota (another app, tab or person), or the free tier counts differently than assumed. Check https://ai.dev/rate-limit for the key's usage.
+- Consequence: no judge results yet; the judge stays "Not used" in demos today. The script is ready and tested (dry run) for the next window.
