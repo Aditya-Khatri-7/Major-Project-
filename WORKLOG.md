@@ -175,3 +175,5 @@ Every step: what, why, result. Newest at the bottom.
 - `eval/degraded_threshold.py` written (fits a threshold on degraded calibration images, tests on held-out sets). NOT RUN: PyTorch cannot load, see next item.
 - BLOCKER: Smart App Control is in enforcement mode (registry VerifiedAndReputablePolicyState = 1) and blocks torch's unsigned DLLs (CodeIntegrity events 3033/3077, torch_global_deps.dll). Local models cannot load on this machine until the owner changes the setting; I did not change any security setting. CI on Linux is unaffected.
 - docker-compose: Streamlit service moved behind the `legacy` profile; the API serves the web interface.
+- Smart App Control turned off by the owner; torch loads again (CUDA ok); 81 tests and the four demo samples pass.
+- `eval/degraded_threshold.py` run: degraded-image threshold 0.586 (standard 0.402), fitted on 1000 degraded calibration images. Screenshot-like copies: false alarms Celeb-DF 9->4%, WildDeepfake 17->8%, FF++ 49->37%; fakes caught -2 to -5 points. Not enabled by default (no automatic degradation detection yet). Report section 5.3 and slides updated.
