@@ -169,3 +169,9 @@ Every step: what, why, result. Newest at the bottom.
 - Running `eval/judge_minirun.py` directly at 09:05 IST failed on the first call: Gemini reported the daily quota exhausted again, retry in 20.4 h (next reset about 05:30 IST on 6 Oct).
 - No judge calls were made by this project between the 05:30 reset and that attempt, so something else is using the key's quota (another app, tab or person), or the free tier counts differently than assumed. Check https://ai.dev/rate-limit for the key's usage.
 - Consequence: no judge results yet; the judge stays "Not used" in demos today. The script is ready and tested (dry run) for the next window.
+
+## 5 Oct 2026 (later): rewrite for similarity, and a Windows blocker
+- Report text rewritten where it was reused from the synopsis: verbatim 8-word overlap with the synopsis 26% -> 1.1% (title, names, certificate wording remain); overlap with the repo's own markdown 1.5%. These are self-similarity measurements, not Turnitin or AI-detector scores. An AI-assistance statement was added to the acknowledgement.
+- `eval/degraded_threshold.py` written (fits a threshold on degraded calibration images, tests on held-out sets). NOT RUN: PyTorch cannot load, see next item.
+- BLOCKER: Smart App Control is in enforcement mode (registry VerifiedAndReputablePolicyState = 1) and blocks torch's unsigned DLLs (CodeIntegrity events 3033/3077, torch_global_deps.dll). Local models cannot load on this machine until the owner changes the setting; I did not change any security setting. CI on Linux is unaffected.
+- docker-compose: Streamlit service moved behind the `legacy` profile; the API serves the web interface.

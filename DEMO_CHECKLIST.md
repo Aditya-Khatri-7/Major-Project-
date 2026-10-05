@@ -34,3 +34,8 @@ Then restart the API; `/health` should show `llm_configured: true`.
 ## Numbers to remember
 Text AUC 0.96-0.998 across five held-out sets; image AUC 0.976-0.999 on seen datasets, 0.794 on unseen manipulation methods.
 The system escalates 30-52% of cases to a human and is 92-99.6% accurate on the rest. Re-uploaded images raise false alarms.
+
+## If the models stop loading: Windows Smart App Control (5 Oct)
+Symptom: every examination returns "uncertain / no usable tool verdicts" and the log shows `OSError: [WinError 4551] An Application Control policy has blocked this file ... torch_global_deps.dll`.
+Cause: Smart App Control (Windows Security > App & browser control) switched to enforcement and blocks PyTorch's unsigned DLLs. It worked on 4 Oct (evaluation mode) and stopped after the restart.
+Check:  `python -c "import torch"`  ->  must print nothing. Fix needs YOUR decision: Smart App Control can only be turned off, not back on without resetting Windows.

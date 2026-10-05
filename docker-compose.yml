@@ -1,4 +1,5 @@
-# CPU stack: API + Streamlit front end. Chroma runs in-process inside the API (persisted in the volume).
+# CPU stack: the API, which also serves the web interface at http://localhost:8000/ . Chroma runs in-process inside the API (persisted in the volume).
+# The old Streamlit client is optional:  docker compose --profile legacy up --build
 # GPU: docker compose -f docker-compose.yml -f docker-compose.gpu.yml up --build
 # Put your trained models in ./models (mounted read-only) and your key in .env.
 services:
@@ -20,6 +21,7 @@ services:
     restart: unless-stopped
 
   frontend:
+    profiles: ["legacy"]
     build:
       context: .
       dockerfile: Dockerfile.frontend

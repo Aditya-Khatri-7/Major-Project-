@@ -243,5 +243,8 @@ table.instruments { width: 100%; border-collapse: collapse; font-size: 13.5px; }
   .masthead, .intake, .actions, .determination, .no-print { display: none !important; }
   .workspace { display: block; padding: 0; }
   .report { border: 0; }
-  .report > section { padding: 12px 0; break-inside: avoid; }
+  body, .report, .panel { background: #fff !important; }
+  .report > section { padding: 12px 0; }
+  .case-head, .finding, .referral, .cleared, .refs li, .instruments tr, .figure-pair figure { break-inside: avoid; }
+  .section-label { display: none; }
 }

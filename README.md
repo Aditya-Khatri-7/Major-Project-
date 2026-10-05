@@ -42,7 +42,7 @@ corresponding tools report an error verdict and the pipeline continues with the 
 ## Docker
 
 ```bash
-docker compose up --build                                          # CPU
+docker compose up --build                                          # CPU; web interface at http://localhost:8000/
 docker compose -f docker-compose.yml -f docker-compose.gpu.yml up  # NVIDIA GPU
 ```
 Models are mounted read-only from `./models`; secrets come from `.env` at run time (never baked into images).
