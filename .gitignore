@@ -38,3 +38,7 @@ models/*
 !models/calibration.json
 hf_cache/
 docs/_work/
+
+# university-provided originals (not for the public repo)
+Agentic_RAG_Digital_Forensics_Synopsis_Report.docx
+Project Presentation Template.pptx
