@@ -17,15 +17,24 @@ def _public_features(v: ToolVerdict) -> dict:
     return out
 
 
+_STRENGTH_ORDER = {"strong": 0, "moderate": 1, "weak": 2}
+
+
 def _summary(state: ForensicState, citations: list[str]) -> str:
     verdict = (state["final_verdict"] or "uncertain").upper()
     confidence = (state["final_confidence"] or 0.0) * 100
     fused = state.get("fused_score")
     parts = [f"Assessed as {verdict} (confidence {confidence:.0f}%"
              + (f", fused P(synthetic)={fused:.2f}" if fused is not None else "") + ")."]
-    strongest = max((v for v in state["tool_verdicts"] if not v.error), key=lambda v: v.confidence, default=None)
+    f = state.get("forensics") or {}
+    findings = sorted((x for x in f.get("findings", []) if x.get("direction") not in ("neutral", "experimental")),
+                      key=lambda x: _STRENGTH_ORDER.get(x.get("strength"), 3))
+    if findings:
+        parts.append("Evidence: " + " ".join(f"[{i}] {x['text']}" for i, x in enumerate(findings[:3], 1)))
+    detectors = [v for v in state["tool_verdicts"] if not v.error and v.tool_name != "image_provenance"]
+    strongest = max(detectors, key=lambda v: v.confidence, default=None)
     if strongest:
-        parts.append(f"Strongest signal: {strongest.tool_name} - {strongest.explanation}")
+        parts.append(f"Strongest detector signal: {strongest.tool_name} - {strongest.explanation}")
     if state["escalate_to_human"]:
         parts.append("Human review recommended.")
     parts.append(f"Supporting sources: {', '.join(citations)}." if citations
@@ -51,6 +60,7 @@ def build_report(state: ForensicState) -> dict:
             for v in state["tool_verdicts"]
         ],
         "evidence": [e.model_dump() for e in evidence],
+        "forensics": {k: (state.get("forensics") or {}).get(k) for k in ("findings", "regions", "evidence_map_file", "maps", "c2pa")},
         "citations": citations,
         "summary": _summary(state, citations),
         "model_versions": model_versions(),

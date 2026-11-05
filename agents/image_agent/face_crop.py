@@ -16,6 +16,7 @@ MARGIN = 0.3
 MAX_FACE_AREA_FRACTION = 0.25     # face box larger than this share of the image = already a crop (a 30%-margin crop is about 0.39)
 MIN_SIDE_PX = 40
 MIN_FACE_PROB = 0.9
+DETECT_MAX_SIDE = 1024
 
 _lock = threading.Lock()
 _mtcnn = None
@@ -41,6 +42,10 @@ def crop_face_if_needed(image_path: str) -> Optional[str]:
             img = ImageOps.exif_transpose(im).convert("RGB")
         det = _detector()
         rotated = 0
+        full = img
+        scale = min(1.0, DETECT_MAX_SIDE / max(img.size))
+        if scale < 1.0:                    # detect on a downscaled copy (4 passes on a 6000 px photo took seconds); crop from the full image
+            img = img.resize((max(1, int(img.width * scale)), max(1, int(img.height * scale))))
         boxes, probs = det.detect(img)
         if boxes is None or len(boxes) == 0 or float(max(probs)) < MIN_FACE_PROB:
             # Sideways / upside-down photo (stress test: 90-degree rotation gave 64-74% false alarms): find the upright orientation.
@@ -52,6 +57,10 @@ def crop_face_if_needed(image_path: str) -> Optional[str]:
                     break
         if boxes is None or len(boxes) == 0:
             return None
+        if scale < 1.0:                                       # map boxes back to full-resolution coordinates, in the (possibly rotated) orientation
+            full = full.rotate(rotated, expand=True) if rotated else full
+            boxes = boxes / scale
+            img = full
         w, h = img.size
         x1, y1, x2, y2 = max(boxes, key=lambda b: (b[2] - b[0]) * (b[3] - b[1]))
         if not rotated and (x2 - x1) * (y2 - y1) / float(w * h) >= MAX_FACE_AREA_FRACTION:
@@ -70,3 +79,21 @@ def crop_face_if_needed(image_path: str) -> Optional[str]:
     except Exception as exc:                                  # cropping must never break the pipeline
         log_event(log, "face_crop_failed", error=f"{type(exc).__name__}: {exc}")
         return None
+
+
+def face_fraction(image_path: str) -> float:
+    """Share of the image area covered by the largest detected face (0.0 when no face is found). Used to tell tight face crops from scenes."""
+    try:
+        from PIL import Image, ImageOps
+        with Image.open(image_path) as im:
+            img = ImageOps.exif_transpose(im).convert("RGB")
+        scale = min(1.0, DETECT_MAX_SIDE / max(img.size))
+        if scale < 1.0:
+            img = img.resize((max(1, int(img.width * scale)), max(1, int(img.height * scale))))
+        boxes, probs = _detector().detect(img)
+        if boxes is None or len(boxes) == 0 or float(max(probs)) < MIN_FACE_PROB:
+            return 0.0
+        x1, y1, x2, y2 = max(boxes, key=lambda b: (b[2] - b[0]) * (b[3] - b[1]))
+        return float(min(1.0, (x2 - x1) * (y2 - y1) / float(img.width * img.height)))
+    except Exception:
+        return 0.0

@@ -10,7 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Optional
 
-from agents.calibration import load_calibration
+from agents.calibration import load_calibration, sigmoid
 from agents.schemas import ToolVerdict
 
 
@@ -62,12 +62,25 @@ def fuse(verdicts: list[ToolVerdict], modality: str, n_words: int = 0, cfg: Opti
     }
     total = sum(weights.values())
     fused = sum(weights[v.tool_name] * v.score for v in usable) / total
+    stack = (cfg.get("stack") or {}).get(modality)
+    if stack:
+        # Learned combination of the tools' raw logits (training/calibrate_image_stack.py). Replaces the plain average because the tools are
+        # reliable on different image types (face crops vs whole scenes), so a fixed average mixes a good and a useless opinion.
+        z = float(stack["bias"])
+        for name, coef in stack["coef"].items():
+            v = next((u for u in verdicts if u.tool_name == name and not u.error and "raw_logit" in u.raw_features), None)
+            if v is not None:
+                z += float(coef) * float(v.raw_features["raw_logit"]) + float(stack["present"][name])
+        fused = sigmoid(z)
+        notes.append("Image score from the learned tool combination (see models/calibration.json 'stack').")
     # Disagreement is judged among tools that carry real weight; advisory (low-weight) tools are only mentioned.
     min_w = float(cfg.get("spread_min_weight", 0.0))
     voters = [v for v in usable if cfg["weights"].get(v.tool_name, 1.0) >= min_w]
     advisory = [v for v in usable if v not in voters]
     scores = [v.score for v in voters]
     spread = (max(scores) - min(scores)) if len(scores) > 1 else 0.0
+    if stack:
+        spread = 0.0                       # the stack already weighs the tools; raw disagreement alone is not escalated
     for v in advisory:
         if abs(v.score - fused) > spread_limit:
             notes.append(f"Advisory tool {v.tool_name} (low weight) disagrees: {v.score:.2f} vs fused {fused:.2f}.")
@@ -106,5 +119,13 @@ def fuse(verdicts: list[ToolVerdict], modality: str, n_words: int = 0, cfg: Opti
 
     escalate = len(usable) < 2 or verdict == "uncertain" or disagreement
     needs_reflexion = len(usable) >= 2 and disagreement and retries == 0
+    prov = next((v for v in usable if v.tool_name == "image_provenance" and v.score >= 0.95), None)
+    if prov is not None:
+        # Provenance beats statistics: the file itself says it was AI-generated. Detectors that disagree are noted, not averaged in.
+        others = [f"{v.tool_name}={v.score:.2f}" for v in usable if v is not prov]
+        notes.append("Provenance rule: embedded Content Credentials declare AI generation; this overrides the detector average"
+                     + (f" (detectors: {', '.join(others)})." if others else "."))
+        fused, verdict, confidence = max(fused, 0.97), "synthetic", 0.9
+        escalate, needs_reflexion = bool(prov.raw_features.get("hash_mismatch")), False
     return FusionResult(fused, spread, [v.tool_name for v in usable], weights, verdict, confidence,
                         escalate, needs_reflexion, notes)

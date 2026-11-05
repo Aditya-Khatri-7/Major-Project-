@@ -14,7 +14,7 @@ from observability import get_logger, log_event
 log = get_logger("agents")
 
 TEXT_TOOL_NAMES = {"dl": "text_dl", "slm": "text_slm", "llm": "text_llm"}
-IMAGE_TOOL_NAMES = {"dl": "image_dl", "clip": "image_clip", "general": "image_general", "vlm": "image_vlm"}
+IMAGE_TOOL_NAMES = {"dl": "image_dl", "clip": "image_clip", "general": "image_general", "modern": "image_modern", "vlm": "image_vlm"}
 JUDGE_TOOLS = {"text": "text_llm", "image": "image_vlm"}
 
 

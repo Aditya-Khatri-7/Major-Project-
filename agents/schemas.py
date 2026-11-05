@@ -54,6 +54,7 @@ class ForensicState(TypedDict):
     escalate_to_human: bool
     citations: list[str]                        # source ids actually retrieved and cited
     report: Optional[dict]
+    forensics: Optional[dict]                   # image evidence package: findings (what), regions + evidence map (where)
 
 
 def initial_state(job_id: str, modality: Modality, input_ref: str) -> ForensicState:
@@ -63,5 +64,5 @@ def initial_state(job_id: str, modality: Modality, input_ref: str) -> ForensicSt
         "retries": 0, "needs_reflexion": False,
         "fused_score": None, "verifier_notes": None,
         "final_verdict": None, "final_confidence": None,
-        "escalate_to_human": False, "citations": [], "report": None,
+        "escalate_to_human": False, "citations": [], "report": None, "forensics": None,
     }

@@ -107,7 +107,7 @@ def main() -> None:
                                            "auc_raw_score": float(roc_auc_score(y, -x)) if len(set(y)) > 1 else None}
             plot_calibration(y, p, args.plots_dir / "text" / "text_slm_after.png", title="text_slm after calibration")
     else:
-        for tool in ("image_dl", "image_clip"):
+        for tool in ("image_dl", "image_clip", "image_modern"):
             if tool not in cache.tools:
                 continue
             x, y = _raw_arrays(cache, tool, "raw_logit")

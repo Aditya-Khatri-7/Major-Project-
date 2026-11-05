@@ -1,6 +1,6 @@
 {
   "text_dl": {
-    "temperature": 1.5562202181699365
+    "temperature": 1.9634640616126928
   },
   "text_slm": {
     "a": -7.137182785322018,
@@ -8,43 +8,64 @@
     "calibrated": true
   },
   "image_dl": {
-    "temperature": 0.9037922383705931
+    "temperature": 1.3351983813747914
   },
   "image_clip": {
-    "temperature": 1.2208869078884643
+    "temperature": 2.05944880596429
   },
   "image_general": {
     "temperature": 1.0,
     "note": "uncalibrated; weight=2*(held-out GRAVEX AUC 0.94-0.5)"
   },
+  "image_modern": {
+    "temperature": 6.758421461814341
+  },
   "weights": {
-    "text_dl": 0.9893546666666666,
+    "text_dl": 0.9890133333333333,
     "text_slm": 0.1,
     "text_llm": 0.3,
-    "image_dl": 0.8895869078257552,
-    "image_clip": 0.7927539081117148,
+    "image_dl": 0.594915923797442,
+    "image_clip": 0.4649305831707513,
     "image_general": 0.88,
+    "image_modern": 0.46306207765114893,
     "image_vlm": 0.3
   },
   "thresholds": {
     "text": {
-      "t_lo": 0.6851208917000943,
-      "t_hi": 0.7851208917000944,
-      "t_star": 0.7351208917000943
+      "t_lo": 0.8355405391287756,
+      "t_hi": 0.9355405391287757,
+      "t_star": 0.8855405391287756
     },
     "image": {
-      "t_lo": 0.13514890604048935,
-      "t_hi": 0.5250445426562915,
-      "t_star": 0.47504454265629154
+      "t_lo": 0.06135879887155166,
+      "t_hi": 0.8067143655582364,
+      "t_star": 0.42361404502160366
     }
   },
   "spread_threshold": 0.35,
   "spread_min_weight": 0.3,
   "min_tool_confidence": 0.15,
-  "calibrated_at": "2026-11-05T06:52:13.460482+00:00",
+  "calibrated_at": "2026-11-05T16:01:26.519920+00:00",
   "calibrated_modalities": [
     "image",
     "text"
   ],
-  "judge_weights_note": "text_llm / image_vlm are NOT fitted: set to 0.3 (just above the advisory cut-off) until the judges are scored on calibration data."
+  "judge_weights_note": "text_llm / image_vlm are NOT fitted: set to 0.3 (just above the advisory cut-off) until the judges are scored on calibration data.",
+  "stack": {
+    "image": {
+      "coef": {
+        "image_dl": 0.9010685262151833,
+        "image_clip": 0.379885553520771,
+        "image_modern": 0.27131006083812514
+      },
+      "present": {
+        "image_dl": 0.7952627869659448,
+        "image_clip": 0.795262786965946,
+        "image_modern": 0.21801427001809393
+      },
+      "bias": 0.22278318207590744,
+      "fitted_on": "agent_calib",
+      "n": 3496
+    }
+  }
 }

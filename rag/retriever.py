@@ -101,4 +101,21 @@ def run_rag_node(state: ForensicState) -> dict:
         log_event(log, "rag_failed", level=logging.WARNING, job_id=state["job_id"], error=str(exc))
         evidence = []
     log_event(log, "rag_done", job_id=state["job_id"], hits=len(evidence))
-    return {"retrieved_evidence": evidence}
+    out = {"retrieved_evidence": evidence}
+    if state.get("forensics"):
+        out["forensics"] = _attach_references(state["forensics"], modality)
+    return out
+
+
+def _attach_references(forensics: Optional[dict], modality: str) -> Optional[dict]:
+    """For each evidence finding, retrieve the best-matching methodology note so the report can explain why it matters and how reliable it is."""
+    if not forensics or not forensics.get("findings"):
+        return forensics
+    try:
+        for f in forensics["findings"]:
+            hits = _kb_hits(f"{f['id'].replace('_', ' ')} {f['text']}", modality, 1, 0.3)
+            if hits:
+                f["reference"] = {"source_id": hits[0].source_id, "similarity": hits[0].similarity_score, "snippet": hits[0].content_snippet}
+    except Exception as exc:
+        log_event(log, "finding_reference_failed", level=logging.WARNING, error=str(exc))
+    return forensics

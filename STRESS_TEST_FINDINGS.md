@@ -131,3 +131,26 @@ Installing v3 with the old thresholds raised false alarms on ordinary human text
 | ALL CAPS: AI missed | 18% | **22%** |
 
 Trade-off: fewer false accusations everywhere, but more AI text slips through when it is degraded (lowercased, typos). Edge cases: Gettysburg and repetitive chat now authentic; legal boilerplate and recipe still wrongly synthetic. Raw numbers: `eval/results/stress/text_stress_v3.json`.
+
+## Round 5: user's real deepfake, modern generators, provenance and small local edits (5 Nov 2026)
+
+**The failure.** A modern AI-generated bedroom selfie (Bing Image Creator) was called authentic at 80% confidence; a real street photo was not cleared. Cause: the face tools were trained on older face-swap/edit data, and the old general probe scored AUROC 0.38 on current generators (Flux.2, Midjourney 7, GPT-image-1.5, OpenFake-tiny test).
+
+**Fixes so far.**
+- New whole-image tool `image_modern` (public SwinV2 detector, Apache-2.0): AUROC 0.91 on OpenFake-tiny test (unseen generators); scored the user's fake 0.95 and the real photo 0.02. Four other public detectors tested; they were weaker or could not separate the two images.
+- Provenance layer: reads Content Credentials (C2PA) with the C2PA SDK. The user's file declares `trainedAlgorithmicMedia` created by Bing Image Creator; now reported as SYNTHETIC with the signature state stated (it validates as "Invalid" here because the issuer is not on the local trust list: a declaration, not proof). Provenance rule in `fuse()`: a declared AI origin overrides the detector average.
+- Structured explanations: findings with strength and a methodology reference retrieved from the knowledge base (RAG), plus an evidence-map image and `/jobs/{id}/evidence-map`.
+
+**Honest negative result: small local edits are NOT reliably detected.** 420 real Stable Diffusion inpainting edits of real faces with exact masks (only the masked region changes), `eval/local_edit_eval.py`:
+
+| Edit size | modern AUC | CNN AUC | CLIP AUC | hottest region on true edit |
+|---|---|---|---|---|
+| 2% | 0.52 | 0.53 | 0.51 | 1% |
+| 8% | 0.50 | 0.56 | 0.54 | 16% |
+| 15% | 0.54 | 0.59 | 0.60 | 29% |
+| 25% | 0.60 | 0.70 | 0.70 | 53% |
+| 40% | 0.69 | 0.79 | 0.72 | 76% |
+
+AUC near 0.5 is chance. The sliding-window "localised region" indicator fired on 12% of unedited images and 19% of edited ones, so it is labelled EXPERIMENTAL and kept out of the verdict summary. Catching small alterations needs a model trained for it (patch/pixel level on inpainting data with masks); 2,400 training edits are being generated for that.
+
+**Still weak:** images with metadata stripped (screenshots, re-uploads) rely on the detectors alone; fusion weights for `image_modern` are being recalibrated on a mix of face-deepfake and OpenFake images.

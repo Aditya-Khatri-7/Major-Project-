@@ -94,6 +94,9 @@ def _to_response(result: dict) -> AnalyzeResponse:
         citations=report.get("citations", []),
         summary=report.get("summary"),
         gradcam_url=gradcam_url,
+        findings=(report.get("forensics") or {}).get("findings") or [],
+        regions=(report.get("forensics") or {}).get("regions") or [],
+        evidence_map_url=(f"/jobs/{result['job_id']}/evidence-map" if (report.get("forensics") or {}).get("evidence_map_file") else None),
     )
 
 
@@ -138,6 +141,14 @@ def get_gradcam(job_id: str):
     path = Path(settings.jobs_dir) / _job_id_or_404(job_id) / "gradcam.png"
     if not path.is_file():
         raise HTTPException(404, "No Grad-CAM image for this job.")
+    return FileResponse(path, media_type="image/png")
+
+
+@app.get("/jobs/{job_id}/evidence-map", dependencies=PROTECTED)
+def get_evidence_map(job_id: str):
+    path = Path(settings.jobs_dir) / _job_id_or_404(job_id) / "evidence_map.png"
+    if not path.is_file():
+        raise HTTPException(404, "No evidence map for this job.")
     return FileResponse(path, media_type="image/png")
 
 

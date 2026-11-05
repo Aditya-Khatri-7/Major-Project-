@@ -39,6 +39,9 @@ class AnalyzeResponse(BaseModel):
     citations: list[str] = Field(default_factory=list)
     summary: Optional[str] = None
     gradcam_url: Optional[str] = None
+    findings: list[dict] = Field(default_factory=list)          # what is odd, with strength, direction and a methodology reference
+    regions: list[dict] = Field(default_factory=list)           # where: boxes in relative image coordinates
+    evidence_map_url: Optional[str] = None
 
 
 class CorrectionRequest(BaseModel):
