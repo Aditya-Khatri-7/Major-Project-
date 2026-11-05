@@ -1,0 +1,56 @@
+{
+  "dff_inpainting": {
+    "auc": 0.9868,
+    "fakes_called_synthetic": 0.92,
+    "fakes_called_authentic": 0.006666666666666667,
+    "real_called_synthetic": 0.02,
+    "real_called_authentic": 0.4866666666666667,
+    "escalated": 0.5,
+    "accuracy_when_decided": 0.9813953488372092
+  },
+  "dff_insight": {
+    "auc": 0.9659555555555556,
+    "fakes_called_synthetic": 0.9,
+    "fakes_called_authentic": 0.02,
+    "real_called_synthetic": 0.02,
+    "real_called_authentic": 0.4866666666666667,
+    "escalated": 0.52,
+    "accuracy_when_decided": 0.9719626168224299
+  },
+  "dff_text2img": {
+    "auc": 0.9958222222222223,
+    "fakes_called_synthetic": 0.9733333333333334,
+    "fakes_called_authentic": 0.0,
+    "real_called_synthetic": 0.02,
+    "real_called_authentic": 0.4866666666666667,
+    "escalated": 0.42,
+    "accuracy_when_decided": 0.9864864864864865
+  },
+  "celebdf": {
+    "auc": 0.9988444444444444,
+    "fakes_called_synthetic": 0.9666666666666667,
+    "fakes_called_authentic": 0.0,
+    "real_called_synthetic": 0.013333333333333334,
+    "real_called_authentic": 0.52,
+    "escalated": 0.47333333333333333,
+    "accuracy_when_decided": 0.9911111111111112
+  },
+  "ffpp_seen": {
+    "auc": 0.8985777777777778,
+    "fakes_called_synthetic": 0.72,
+    "fakes_called_authentic": 0.03333333333333333,
+    "real_called_synthetic": 0.02666666666666667,
+    "real_called_authentic": 0.20666666666666667,
+    "escalated": 0.6833333333333333,
+    "accuracy_when_decided": 0.9391891891891891
+  },
+  "ffpp_unseen": {
+    "auc": 0.708088888888889,
+    "fakes_called_synthetic": 0.26,
+    "fakes_called_authentic": 0.11333333333333333,
+    "real_called_synthetic": 0.04,
+    "real_called_authentic": 0.22,
+    "escalated": 0.87,
+    "accuracy_when_decided": 0.7578947368421053
+  }
+}

@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     gemini_model_id: str = "gemini-2.5-flash"
 
     # --- local models ---
-    text_dl_model_path: str = "models/text_dl_v2"              # directory (HF format); v2 = DeBERTa-v3-base on the HC3+MAGE+RAID mix
+    text_dl_model_path: str = "models/text_dl_v3"              # directory (HF format); v3 = v2 + hard human text and matching AI text
     slm_observer_model: str = "Qwen/Qwen2.5-0.5B"
     slm_performer_model: str = "Qwen/Qwen2.5-0.5B-Instruct"
     image_model_path: str = "models/efficientnet_b4.pt"

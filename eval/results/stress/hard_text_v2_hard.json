@@ -1,0 +1,42 @@
+{
+  "thresholds": {
+    "t_lo": 0.6851208917000943,
+    "t_hi": 0.7851208917000944,
+    "t_star": 0.7351208917000943
+  },
+  "ALL": {
+    "n": 600,
+    "auc": 0.9705555555555556,
+    "human_called_synthetic": 0.6366666666666667,
+    "human_uncertain": 0.04666666666666667,
+    "ai_called_authentic": 0.0
+  },
+  "books_classic": {
+    "n": 150,
+    "auc": 0.9996413199426112,
+    "human_called_synthetic": 0.23529411764705882,
+    "human_uncertain": 0.10294117647058823,
+    "ai_called_authentic": 0.0
+  },
+  "code": {
+    "n": 126,
+    "auc": 0.8901601830663615,
+    "human_called_synthetic": 0.9565217391304348,
+    "human_uncertain": 0.028985507246376812,
+    "ai_called_authentic": 0.0
+  },
+  "gov_report": {
+    "n": 152,
+    "auc": 0.9984415584415585,
+    "human_called_synthetic": 0.33766233766233766,
+    "human_uncertain": 0.03896103896103896,
+    "ai_called_authentic": 0.0
+  },
+  "legal": {
+    "n": 172,
+    "auc": 0.9686316928069227,
+    "human_called_synthetic": 0.9651162790697675,
+    "human_uncertain": 0.023255813953488372,
+    "ai_called_authentic": 0.0
+  }
+}

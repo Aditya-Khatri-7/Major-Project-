@@ -1,0 +1,65 @@
+{
+  "original": {
+    "auc": 0.9984,
+    "fakes_called_authentic": 0.0,
+    "real_called_synthetic": 0.02,
+    "escalated": 0.43,
+    "silent_wrong": 0.0
+  },
+  "pad_1.8x_context": {
+    "auc": 0.9984,
+    "fakes_called_authentic": 0.0,
+    "real_called_synthetic": 0.02,
+    "escalated": 0.44,
+    "silent_wrong": 0.0
+  },
+  "rotate_90": {
+    "auc": 0.892,
+    "fakes_called_authentic": 0.0,
+    "real_called_synthetic": 0.24,
+    "escalated": 0.44,
+    "silent_wrong": 0.05
+  },
+  "rotate_15": {
+    "auc": 0.9948,
+    "fakes_called_authentic": 0.0,
+    "real_called_synthetic": 0.22,
+    "escalated": 0.49,
+    "silent_wrong": 0.04
+  },
+  "gauss_noise_s8": {
+    "auc": 0.99,
+    "fakes_called_authentic": 0.0,
+    "real_called_synthetic": 0.04,
+    "escalated": 0.55,
+    "silent_wrong": 0.0
+  },
+  "tiny_64px": {
+    "auc": 0.9848,
+    "fakes_called_authentic": 0.0,
+    "real_called_synthetic": 0.12,
+    "escalated": 0.49,
+    "silent_wrong": 0.03
+  },
+  "watermark_text": {
+    "auc": 0.9792000000000001,
+    "fakes_called_authentic": 0.02,
+    "real_called_synthetic": 0.02,
+    "escalated": 0.56,
+    "silent_wrong": 0.01
+  },
+  "grayscale": {
+    "auc": 0.9967999999999999,
+    "fakes_called_authentic": 0.0,
+    "real_called_synthetic": 0.04,
+    "escalated": 0.46,
+    "silent_wrong": 0.01
+  },
+  "fgsm_eps2": {
+    "auc": 0.9188000000000001,
+    "fakes_called_authentic": 0.0,
+    "real_called_synthetic": 0.14,
+    "escalated": 0.96,
+    "silent_wrong": 0.03
+  }
+}

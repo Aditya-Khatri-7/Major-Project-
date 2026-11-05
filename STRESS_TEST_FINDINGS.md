@@ -76,3 +76,42 @@ Re-ran the same tests on the retrained models (`eval/stress_system_image.py`, `e
 | Confident false accusation of formal human text | 5 of 10 edge cases | 4 of 10 (code and Spanish now escalated; Gettysburg, legal, recipe, repetitive chat unchanged) |
 
 Still open, in priority order: formal/templated human text (needs hard negatives plus matching AI text and a DeBERTa retrain), white-box adversarial robustness, 15-degree tilt (24% false alarms on Celeb-DF), tiny images, ChatGPT/Gemini-style image edits, judges.
+
+## Round 3: adversarial training of the image CNN (v5), 5 Nov 2026
+
+Fine-tuned v4 for 1 epoch with FGSM adversarial examples mixed into half the batches (eps 3/255). White-box FGSM eps 2/255 on Celeb-DF, full system:
+
+| | v4 (installed) | v5 (adversarial) |
+|---|---|---|
+| Attacked AUC | 0.36 | 0.92 |
+| Attacked, wrong and NOT escalated | 11% | 3% |
+| Attacked, escalated | 70% | 96% |
+| Celeb-DF clean AUC | 0.999 | 0.998 |
+| DFF inpainting / insight / text2img AUC | 0.985 / 0.968 / 0.990 | 0.985 / 0.967 / 0.995 |
+| FF++ seen / unseen AUC | 0.925 / 0.776 | 0.898 / 0.698 |
+| FF++ unseen fakes called authentic | lower | 42% |
+
+Decision: **v4 stays installed.** v5 buys robustness to a one-step attack but loses accuracy on compressed video-style deepfakes (FF++). v5 was trained against the same attack it is tested with, so the gain may not hold against multi-step attacks (PGD); that was not tested. Weights kept in `models/efficientnet_b4_v5.pt` and calibration in `models/_archive/calibration_v5.json`. A fairer try would mix FF++ frames into the adversarial training set.
+
+## Round 4: hard human text and a text retrain (v3), 5 Nov 2026
+
+Built 6,000 hard human chunks (bills, government reports, classic books, Python code) and about 4,600 matching AI texts from local Qwen 1.5B and 3B. Fine-tuned DeBERTa v2 for 2 epochs on this plus a replay sample of the original mix (`data/build_hard_mix.py`, `models/text_dl_v3`). Evaluated with `eval/hard_text_eval.py`.
+
+| Held-out test | v2 | v3 |
+|---|---|---|
+| Hard human texts called synthetic (legal / code) | 64% (97% / 96%) | 2.7% (0% / 1%) |
+| Hard set AUC | 0.971 | 0.999 |
+| MAGE test AUC (regression check) | 0.968 | 0.971 |
+
+Caveat: the hard test set shares AI generators and prompt styles with training, so it overstates the gain. The 10 hand-written edge cases are the independent check:
+
+| Edge case | v2 | v3 |
+|---|---|---|
+| Gettysburg Address (human) | synthetic (0.88) | authentic (0.12) |
+| Python code with comments | 0.99 | uncertain (0.29) |
+| Legal boilerplate | synthetic | **still synthetic (0.99)** |
+| Recipe list | synthetic | **still synthetic (1.00)** |
+| Repetitive casual chat | synthetic | **still synthetic (0.82)** |
+| ESL, abstract, Hindi (Roman), poem | correct | correct |
+
+Installed v3 (`config.py`, `.env`). Text thresholds were not recalibrated. Still open: recipes, contract boilerplate and forum chat need their own human training text; Binoculars adds no signal; judges untested.

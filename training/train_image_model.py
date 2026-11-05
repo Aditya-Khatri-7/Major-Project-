@@ -282,6 +282,9 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--sbi-prob", type=float, default=0.0,
                     help="probability a real training image is turned into a self-blended pseudo-fake (generalisation)")
+    ap.add_argument("--adv-prob", type=float, default=0.0,
+                    help="share of batches that also train on FGSM-perturbed copies (white-box attack on this model)")
+    ap.add_argument("--adv-eps", type=float, default=3.0, help="max FGSM step in 0-255 pixel units")
     ap.add_argument("--init-weights", type=Path, default=None, help="start from an existing state_dict")
     ap.add_argument("--resume", action="store_true")
     ap.add_argument("--final-test", action="store_true", help="evaluate the best model on test/ once, after training")
@@ -345,7 +348,8 @@ def main() -> None:
     for epoch in range(start_epoch, args.epochs + 1):
         t0 = time.time()
         tr_loss, tr_y, tr_p = _train_epoch(model, train_loader, device, amp_dtype, scaler, criterion, eval_criterion,
-                                           fake_idx, optimizer, scheduler, f"epoch {epoch} [train]")
+                                           fake_idx, optimizer, scheduler, f"epoch {epoch} [train]",
+                                           adv_prob=args.adv_prob, adv_eps=args.adv_eps)
         va_loss, va_y, va_p = run_epoch(model, val_loader, device, amp_dtype, scaler, eval_criterion, fake_idx,
                                         desc=f"epoch {epoch} [valid]")
         row = {"epoch": epoch, "lr": optimizer.param_groups[0]["lr"], "epoch_time_s": round(time.time() - t0, 1)}
@@ -403,7 +407,18 @@ def main() -> None:
     print(f"Results: {args.results_dir} | Plots: {args.plots_dir}")
 
 
-def _train_epoch(model, loader, device, amp_dtype, scaler, criterion, eval_criterion, fake_idx, optimizer, scheduler, desc):
+def _fgsm_batch(model, images, y, criterion, eps_pixels: float):
+    """FGSM copy of a normalised batch: one signed-gradient step of up to eps_pixels/255 in raw pixel space."""
+    std = torch.tensor(IMAGENET_STD, device=images.device).view(1, 3, 1, 1)
+    x = images.clone().requires_grad_(True)
+    loss = criterion(model(x).float(), y)
+    grad, = torch.autograd.grad(loss, x)
+    step = (random.uniform(0.4, 1.0) * eps_pixels / 255.0) / std
+    return (images + step * grad.sign()).detach()
+
+
+def _train_epoch(model, loader, device, amp_dtype, scaler, criterion, eval_criterion, fake_idx, optimizer, scheduler, desc,
+                 adv_prob: float = 0.0, adv_eps: float = 3.0):
     """One training epoch. Optimises `criterion` (label-smoothed) but reports the unsmoothed loss."""
     model.train(True)
     total, n, probs, labels = 0.0, 0, [], []
@@ -412,6 +427,10 @@ def _train_epoch(model, loader, device, amp_dtype, scaler, criterion, eval_crite
         images = images.to(device, non_blocking=True)
         y = y.to(device, non_blocking=True)
         optimizer.zero_grad(set_to_none=True)
+        if adv_prob > 0 and random.random() < adv_prob:
+            with torch.autocast(device_type=device.type, dtype=amp_dtype, enabled=amp_dtype is not None):
+                adv = _fgsm_batch(model, images, y, criterion, adv_eps)
+            images, y = torch.cat([images, adv]), torch.cat([y, y])           # train on clean + attacked copies
         with torch.autocast(device_type=device.type, dtype=amp_dtype, enabled=amp_dtype is not None):
             logits = model(images)
         loss = criterion(logits.float(), y)

@@ -1,0 +1,14 @@
+{
+  "thresholds": {
+    "t_lo": 0.6851208917000943,
+    "t_hi": 0.7851208917000944,
+    "t_star": 0.7351208917000943
+  },
+  "ALL": {
+    "n": 600,
+    "auc": 0.9676444444444444,
+    "human_called_synthetic": 0.07333333333333333,
+    "human_uncertain": 0.01,
+    "ai_called_authentic": 0.09
+  }
+}
