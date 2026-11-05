@@ -115,3 +115,19 @@ Caveat: the hard test set shares AI generators and prompt styles with training, 
 | ESL, abstract, Hindi (Roman), poem | correct | correct |
 
 Installed v3 (`config.py`, `.env`). Text thresholds were not recalibrated. Still open: recipes, contract boilerplate and forum chat need their own human training text; Binoculars adds no signal; judges untested.
+
+### Round 4 addendum: v3 recalibrated (text thresholds 0.685/0.785 -> 0.836/0.936)
+
+Installing v3 with the old thresholds raised false alarms on ordinary human text (7% -> 12%; emoji text 16% -> 32%): v3 is more confident, so v2's thresholds were too low. After recalibrating on `mix_calib` (1,500 texts, Binoculars weight capped at 0.10):
+
+| Condition | v2 false alarm / AI missed | v3 recalibrated |
+|---|---|---|
+| Original MAGE text | 7% / 3% | 3% / 2% |
+| Emoji + hashtags | 16% / 3% | 13% / 1% |
+| Text pasted twice | 7% / 3% | 3% / 3% |
+| Hard formal human text (own test set) | 64% | 1.3% |
+| Lowercase, no punctuation: AI missed | 21% | **31%** |
+| 8% typos: AI missed | 9% | **14%** |
+| ALL CAPS: AI missed | 18% | **22%** |
+
+Trade-off: fewer false accusations everywhere, but more AI text slips through when it is degraded (lowercased, typos). Edge cases: Gettysburg and repetitive chat now authentic; legal boilerplate and recipe still wrongly synthetic. Raw numbers: `eval/results/stress/text_stress_v3.json`.
