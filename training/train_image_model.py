@@ -85,6 +85,34 @@ class RandomDownscale:
         return small.resize((w, h), Image.BICUBIC)
 
 
+class RandomTilt:
+    """Small rotations, and occasionally a quarter turn: uploads are often tilted or sideways (stress test: 90 degrees gave 64-74% false alarms)."""
+
+    def __init__(self, p: float = 0.3, max_deg: float = 20.0, quarter_p: float = 0.05):
+        self.p, self.max_deg, self.quarter_p = p, max_deg, quarter_p
+
+    def __call__(self, img: Image.Image) -> Image.Image:
+        r = random.random()
+        if r < self.quarter_p:
+            return img.rotate(random.choice((90, 180, 270)), expand=True)
+        if r < self.quarter_p + self.p:
+            return img.rotate(random.uniform(-self.max_deg, self.max_deg), resample=Image.BILINEAR, fillcolor=(0, 0, 0))
+        return img
+
+
+class RandomNoise:
+    """Additive Gaussian pixel noise (stress test: sigma 8 dropped FF++ AUC by 0.1)."""
+
+    def __init__(self, p: float = 0.25, sigma=(2.0, 10.0)):
+        self.p, self.sigma = p, sigma
+
+    def __call__(self, img: Image.Image) -> Image.Image:
+        if random.random() > self.p:
+            return img
+        a = np.asarray(img).astype(np.float32) + np.random.normal(0, random.uniform(*self.sigma), (img.height, img.width, 3))
+        return Image.fromarray(np.clip(a, 0, 255).astype(np.uint8))
+
+
 class SelfBlend:
     """Self-blended image (SBI) pseudo-fake: blend a slightly altered copy of a REAL face back onto itself.
 
@@ -146,7 +174,7 @@ def transforms_for(train: bool):
     if not train:
         return transforms.Compose([transforms.Resize((IMG_SIZE, IMG_SIZE))] + normalize)
     return transforms.Compose([
-        RandomDownscale(), RandomJPEG(p=0.6), RandomBlur(),
+        RandomTilt(), RandomDownscale(), RandomNoise(), RandomJPEG(p=0.6), RandomBlur(),
         transforms.RandomResizedCrop(IMG_SIZE, scale=(0.6, 1.0), ratio=(0.85, 1.15)),
         transforms.RandomHorizontalFlip(),
         transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.15, hue=0.02),

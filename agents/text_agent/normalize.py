@@ -29,6 +29,7 @@ _CONFUSABLES = {
 _ZERO_WIDTH = dict.fromkeys(map(ord, "​‌‍⁠﻿­᠎"), None)
 _SPACES = re.compile(r"[ \t  -   　]+")
 _TRANS = {ord(k): v for k, v in _CONFUSABLES.items()}
+_REPEATED_BLOCK = re.compile(r"^(?P<blk>.{40,}?)(?:\s+(?P=blk))+$", re.S)   # the same block pasted several times
 
 
 def normalize_text(text: str) -> tuple[str, dict]:
@@ -46,10 +47,16 @@ def normalize_text(text: str) -> tuple[str, dict]:
         out = out.translate(_TRANS)
     out = _SPACES.sub(" ", out)
     out = re.sub(r"\n{3,}", "\n\n", out).strip()
+    repeated = _REPEATED_BLOCK.match(out)
+    copies = 1
+    if repeated:                                           # stress test: a text pasted twice dropped AUC 0.99 -> 0.83
+        copies = len(out) // max(len(repeated.group(1)), 1)
+        out = repeated.group(1).strip()
     changed = sum(1 for a, b in zip(text, out) if a != b) + abs(len(text) - len(out))
     return out, {
         "homoglyph_chars": confusable,
         "zero_width_chars": zero_width,
         "tamper_ratio": round(min((confusable + zero_width) / n_chars, 1.0), 4),
+        "repeated_copies": copies,
         "changed_chars": changed,
     }

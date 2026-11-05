@@ -13,7 +13,7 @@ from agents.calibration import load_calibration, tool_confidence, tool_probabili
 from agents.schemas import ToolVerdict
 
 TOOL_NAME = "image_clip"
-PROBE_PATH = Path("models/clip_probe_v2.joblib")   # unified face-swap + AI-synthesised-face probe (eval/clip_face_unified.py)
+PROBE_PATH = Path("models/clip_probe_v3.joblib")   # v2 data + DeepFakeFace diffusion edits / swaps / text2img faces (eval/clip_face_v3.py)
 
 _lock = threading.Lock()
 _loaded: dict = {}

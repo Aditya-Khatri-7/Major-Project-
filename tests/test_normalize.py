@@ -15,3 +15,11 @@ def test_genuine_non_latin_text_is_not_mangled():
     russian = "Это обычный русский текст без подмены букв"
     out, stats = normalize_text(russian)
     assert out == russian and stats["homoglyph_chars"] == 0
+
+
+def test_pasted_duplicates_collapse_to_one_copy():
+    from agents.text_agent.normalize import normalize_text
+    t = "This is a reasonably long sentence that should be repeated. It keeps going for a while."
+    out, stats = normalize_text(t + "\n\n" + t + "\n\n" + t)
+    assert out == t and stats["repeated_copies"] == 3
+    assert normalize_text(t)[1]["repeated_copies"] == 1

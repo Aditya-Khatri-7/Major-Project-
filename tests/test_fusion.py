@@ -84,3 +84,11 @@ def test_two_weighted_tools_still_trigger_disagreement():
     cfg = {**load_calibration(), "spread_min_weight": 0.3}
     r = fuse([make_verdict("text_dl", 0.95, 0.9), make_verdict("text_llm", 0.1, 0.9)], "text", 200, cfg)
     assert r.spread > 0.35 and r.needs_reflexion and r.escalate
+
+
+def test_short_text_never_gets_a_decisive_verdict():
+    v = [make_verdict("text_dl", 0.97, 0.9), make_verdict("text_llm", 0.95, 0.8)]
+    r = fuse(v, "text", 25, cfg())
+    assert r.verdict == "uncertain" and r.escalate and r.confidence <= 0.3
+    assert any("too short" in n for n in r.notes)
+    assert fuse(v, "text", 200, cfg()).verdict == "synthetic"

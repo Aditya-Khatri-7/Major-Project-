@@ -34,6 +34,10 @@ def run_image_agent(state: ForensicState) -> dict:
     out_of_scope = face_p is not None and face_p < SCOPE_THRESHOLD
     if out_of_scope:
         log_event(log, "image_out_of_scope", face_probability=round(face_p, 3))
+    face_path = path
+    if not out_of_scope and any(k in FACE_TOOLS for k in settings.image_tools):
+        from agents.image_agent.face_crop import crop_face_if_needed
+        face_path = crop_face_if_needed(path) or path           # face tools expect a tight face crop, not a full photo
     for key in settings.image_tools:
         if key == "general" and not out_of_scope:
             continue                      # face photos are judged by the face-deepfake tools only
@@ -47,5 +51,5 @@ def run_image_agent(state: ForensicState) -> dict:
         if fn is None:
             log_event(log, "unknown_image_tool", tool=key)
             continue
-        verdicts.append(run_tool(IMAGE_TOOL_NAMES[key], "image", fn, path))
+        verdicts.append(run_tool(IMAGE_TOOL_NAMES[key], "image", fn, face_path if key in FACE_TOOLS else path))
     return {"tool_verdicts": verdicts}

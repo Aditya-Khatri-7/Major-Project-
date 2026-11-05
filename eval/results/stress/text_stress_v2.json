@@ -1,0 +1,193 @@
+{
+  "perturbations": {
+    "original": {
+      "auc": 0.9869252873563219,
+      "human_false_alarm_rate": 0.06666666666666667,
+      "ai_missed_rate": 0.03333333333333333,
+      "escalation_rate": 0.35,
+      "accuracy_when_decided": 0.948936170212766,
+      "mean_fused_human": 0.1378958040257779,
+      "mean_fused_ai": 0.949635809090204,
+      "dl_auc": 0.9882638888888888,
+      "slm_auc": 0.6021527777777779
+    },
+    "first_25_words": {
+      "auc": 0.5504503792667509,
+      "human_false_alarm_rate": 0.0,
+      "ai_missed_rate": 0.0,
+      "escalation_rate": 1.0,
+      "accuracy_when_decided": null,
+      "mean_fused_human": 0.8192705854975729,
+      "mean_fused_ai": 0.8435020627785731,
+      "dl_auc": 0.5429513888888889,
+      "slm_auc": 0.5
+    },
+    "first_50_words": {
+      "auc": 0.7943349753694582,
+      "human_false_alarm_rate": 0.0,
+      "ai_missed_rate": 0.0,
+      "escalation_rate": 1.0,
+      "accuracy_when_decided": null,
+      "mean_fused_human": 0.6167463696824362,
+      "mean_fused_ai": 0.8981018339826105,
+      "dl_auc": 0.8,
+      "slm_auc": 0.602638888888889
+    },
+    "typos_8pct": {
+      "auc": 0.9854341736694677,
+      "human_false_alarm_rate": 0.016666666666666666,
+      "ai_missed_rate": 0.09166666666666666,
+      "escalation_rate": 0.2375,
+      "accuracy_when_decided": 0.9451476793248945,
+      "mean_fused_human": 0.05360638630904271,
+      "mean_fused_ai": 0.8988462785809873,
+      "dl_auc": 0.9878472222222221,
+      "slm_auc": 0.5246527777777779
+    },
+    "lowercase_no_punct": {
+      "auc": 0.9790616246498599,
+      "human_false_alarm_rate": 0.008333333333333333,
+      "ai_missed_rate": 0.20833333333333334,
+      "escalation_rate": 0.3458333333333333,
+      "accuracy_when_decided": 0.8879310344827587,
+      "mean_fused_human": 0.059677431552374656,
+      "mean_fused_ai": 0.7958116586632968,
+      "dl_auc": 0.9771527777777778,
+      "slm_auc": 0.6455555555555557
+    },
+    "synonym_swap": {
+      "auc": 0.988655462184874,
+      "human_false_alarm_rate": 0.03333333333333333,
+      "ai_missed_rate": 0.041666666666666664,
+      "escalation_rate": 0.2916666666666667,
+      "accuracy_when_decided": 0.9620253164556962,
+      "mean_fused_human": 0.08830196419401337,
+      "mean_fused_ai": 0.9321389309127052,
+      "dl_auc": 0.9895138888888888,
+      "slm_auc": 0.588125
+    },
+    "sentence_shuffle": {
+      "auc": 0.9803686180354494,
+      "human_false_alarm_rate": 0.06666666666666667,
+      "ai_missed_rate": 0.025,
+      "escalation_rate": 0.37916666666666665,
+      "accuracy_when_decided": 0.9533898305084746,
+      "mean_fused_human": 0.1350501787413964,
+      "mean_fused_ai": 0.9457942709912147,
+      "dl_auc": 0.9867361111111111,
+      "slm_auc": 0.556111111111111
+    },
+    "emoji_hashtags": {
+      "auc": 0.9752824858757063,
+      "human_false_alarm_rate": 0.15833333333333333,
+      "ai_missed_rate": 0.03333333333333333,
+      "escalation_rate": 0.37916666666666665,
+      "accuracy_when_decided": 0.902542372881356,
+      "mean_fused_human": 0.23927546564542096,
+      "mean_fused_ai": 0.9521463551624688,
+      "dl_auc": 0.9840972222222222,
+      "slm_auc": 0.5771527777777777
+    },
+    "double_text": {
+      "auc": 0.9875745169862816,
+      "human_false_alarm_rate": 0.06666666666666667,
+      "ai_missed_rate": 0.025,
+      "escalation_rate": 0.3875,
+      "accuracy_when_decided": 0.9529914529914529,
+      "mean_fused_human": 0.1426328390586017,
+      "mean_fused_ai": 0.9543239354611425,
+      "dl_auc": 0.9882638888888888,
+      "slm_auc": 0.6027777777777777
+    },
+    "all_caps": {
+      "auc": 0.9826330532212885,
+      "human_false_alarm_rate": 0.008333333333333333,
+      "ai_missed_rate": 0.18333333333333332,
+      "escalation_rate": 0.38333333333333336,
+      "accuracy_when_decided": 0.902542372881356,
+      "mean_fused_human": 0.05282987762593731,
+      "mean_fused_ai": 0.8253833519744669,
+      "dl_auc": 0.9829166666666667,
+      "slm_auc": 0.6352083333333334
+    }
+  },
+  "human_edge_cases": {
+    "gettysburg_formal": {
+      "fused": 0.8935967625671215,
+      "verdict": "synthetic",
+      "escalate": false,
+      "dl": 0.8821268556451287,
+      "slm": 0.9848873184015327
+    },
+    "legal_boilerplate": {
+      "fused": 0.9820563529263032,
+      "verdict": "synthetic",
+      "escalate": false,
+      "dl": 0.9862725418210173,
+      "slm": 0.876922154781114
+    },
+    "esl_simple": {
+      "fused": 0.19563992461327637,
+      "verdict": "authentic",
+      "escalate": true,
+      "dl": 0.19563992461327637,
+      "slm": 0.539098458119392
+    },
+    "scientific_abstract": {
+      "fused": 0.04189547360220337,
+      "verdict": "authentic",
+      "escalate": true,
+      "dl": 0.04189547360220337,
+      "slm": 0.5163832791614767
+    },
+    "hindi_roman": {
+      "fused": 0.07684204775534688,
+      "verdict": "authentic",
+      "escalate": false,
+      "dl": 0.06991534856689716,
+      "slm": 0.6104656481642232
+    },
+    "spanish": {
+      "fused": 0.15618952938914862,
+      "verdict": "uncertain",
+      "escalate": true,
+      "dl": 0.14982586971722348,
+      "slm": 0.5994704284412261
+    },
+    "code_comment_mix": {
+      "fused": 0.9803357128617375,
+      "verdict": "uncertain",
+      "escalate": true,
+      "dl": 0.9861765156723881,
+      "slm": 0.6874074845261176
+    },
+    "recipe_list": {
+      "fused": 0.985060687677829,
+      "verdict": "synthetic",
+      "escalate": false,
+      "dl": 0.9913084303245088,
+      "slm": 0.732567868334048
+    },
+    "poem": {
+      "fused": 0.19100694921137926,
+      "verdict": "authentic",
+      "escalate": false,
+      "dl": 0.1873488598971028,
+      "slm": 0.3103102500705887
+    },
+    "repetitive_human": {
+      "fused": 0.8701605457967259,
+      "verdict": "synthetic",
+      "escalate": false,
+      "dl": 0.8745459469390884,
+      "slm": 0.6432027200677406
+    }
+  },
+  "mixed_authorship": {
+    "ai_share_0pct": 0.13404359462847543,
+    "ai_share_25pct": 0.3442370917525883,
+    "ai_share_50pct": 0.5201323440930199,
+    "ai_share_75pct": 0.6689142515752394,
+    "ai_share_100pct": 0.9142685271634905
+  }
+}

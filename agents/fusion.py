@@ -14,6 +14,9 @@ from agents.calibration import load_calibration
 from agents.schemas import ToolVerdict
 
 
+SHORT_TEXT_WORDS = 60
+
+
 def length_factor(tool_name: str, n_words: int) -> float:
     """Down-weight tools that are unreliable on short text (text modality only)."""
     if tool_name == "text_slm":
@@ -76,7 +79,15 @@ def fuse(verdicts: list[ToolVerdict], modality: str, n_words: int = 0, cfg: Opti
     else:
         verdict = "uncertain"
 
+    short_text = modality == "text" and 0 < n_words < SHORT_TEXT_WORDS
+    if short_text and verdict != "uncertain":
+        # Stress test: under ~60 words the classifier is near chance (AUC 0.55 at 25 words) and flags most human texts.
+        verdict = "uncertain"
+        notes.append(f"Text has only {n_words} words (< {SHORT_TEXT_WORDS}); too short for a reliable verdict, score is indicative only.")
+
     confidence = abs(fused - 0.5) * 2.0
+    if short_text:
+        confidence = min(confidence, 0.3)
     disagreement = spread > spread_limit
     if disagreement:
         confidence -= 0.15
