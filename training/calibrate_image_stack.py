@@ -1,3 +1,4 @@
+# ruff: noqa: E501
 """Fit the learned image-tool combination (logistic regression on raw tool logits) and its decision thresholds on the calibration cache.
 
     python training/calibrate_image_stack.py --cache-dir eval/cache/agent_calib
@@ -23,7 +24,8 @@ from config import settings  # noqa: E402
 from eval.cache import load_cache  # noqa: E402
 from eval.metrics import choose_thresholds  # noqa: E402
 
-TOOLS = ("image_dl", "image_clip", "image_modern")
+TOOLS = ("image_dl", "image_clip", "image_modern", "image_edit")
+POSITIVE_ONLY = ("image_edit",)      # "traces found" is evidence of a fake; "none found" says nothing (face swaps leave no diffusion traces)
 
 
 def main() -> None:
@@ -43,17 +45,18 @@ def main() -> None:
         for c, t in enumerate(TOOLS):
             v = cache.samples[i]["verdicts"].get(t)
             if v is not None and not v.error and "raw_logit" in v.raw_features:
-                X[r, c], X[r, len(TOOLS) + c] = float(v.raw_features["raw_logit"]), 1.0
+                z = float(v.raw_features["raw_logit"])
+                X[r, c], X[r, len(TOOLS) + c] = (max(z, 0.0) if t in POSITIVE_ONLY else z), 1.0
     lr = LogisticRegression(C=a.C, max_iter=3000).fit(X, y)
     p = lr.predict_proba(X)[:, 1]
     th = choose_thresholds(y, p, a.target_precision, a.target_npv)
     th["t_lo"] = float(min(np.quantile(p[y == 1], a.fake_miss), th["t_star"] - 0.05))
-    print(f"n={len(ids)}  AUROC(calib)={roc_auc_score(y, p):.4f}  coef={dict(zip(TOOLS, lr.coef_[0][:3].round(3)))}  thresholds={th}")
+    print(f"n={len(ids)}  AUROC(calib)={roc_auc_score(y, p):.4f}  coef={ {t: round(float(c), 3) for t, c in zip(TOOLS, lr.coef_[0][:len(TOOLS)])} }  thresholds={th}")
     path = Path(settings.calibration_path)
     cal = json.loads(path.read_text(encoding="utf-8"))
     cal.setdefault("stack", {})["image"] = {"coef": {t: float(lr.coef_[0][k]) for k, t in enumerate(TOOLS)},
                                            "present": {t: float(lr.coef_[0][len(TOOLS) + k]) for k, t in enumerate(TOOLS)},
-                                           "bias": float(lr.intercept_[0]), "fitted_on": a.cache_dir.name, "n": len(ids)}
+                                           "positive_only": list(POSITIVE_ONLY), "bias": float(lr.intercept_[0]), "fitted_on": a.cache_dir.name, "n": len(ids)}
     cal["thresholds"]["image"] = th
     cal["calibrated_at"] = datetime.now(timezone.utc).isoformat()
     path.write_text(json.dumps(cal, indent=2), encoding="utf-8")

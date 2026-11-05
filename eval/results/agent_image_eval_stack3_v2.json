@@ -1,0 +1,93 @@
+{
+  "agent_test_celebdf_v2": {
+    "n": 300,
+    "auc": 0.9977777777777778,
+    "fakes_called_authentic": 0.0,
+    "fakes_called_synthetic": 0.8266666666666667,
+    "real_called_synthetic": 0.0,
+    "escalated": 0.3466666666666667,
+    "silent_wrong": 0.0,
+    "accuracy_when_decided": 1.0,
+    "auc_image_clip": 0.8471555555555556,
+    "auc_image_dl": 0.9987111111111111,
+    "auc_image_modern": 0.5098
+  },
+  "agent_test_dff_inpainting_v2": {
+    "n": 300,
+    "auc": 0.9394666666666667,
+    "fakes_called_authentic": 0.04,
+    "fakes_called_synthetic": 0.30666666666666664,
+    "real_called_synthetic": 0.0,
+    "escalated": 0.5066666666666667,
+    "silent_wrong": 0.04054054054054054,
+    "accuracy_when_decided": 0.9594594594594594,
+    "auc_image_clip": 0.9500888888888889,
+    "auc_image_dl": 0.8401555555555554,
+    "auc_image_modern": 0.6644
+  },
+  "agent_test_dff_insight_v2": {
+    "n": 300,
+    "auc": 0.9294222222222224,
+    "fakes_called_authentic": 0.05333333333333334,
+    "fakes_called_synthetic": 0.38666666666666666,
+    "real_called_synthetic": 0.0,
+    "escalated": 0.46,
+    "silent_wrong": 0.04938271604938271,
+    "accuracy_when_decided": 0.9506172839506173,
+    "auc_image_clip": 0.9231111111111111,
+    "auc_image_dl": 0.8863111111111109,
+    "auc_image_modern": 0.5232
+  },
+  "agent_test_dff_text2img_v2": {
+    "n": 300,
+    "auc": 0.9895111111111111,
+    "fakes_called_authentic": 0.0,
+    "fakes_called_synthetic": 0.6866666666666666,
+    "real_called_synthetic": 0.0,
+    "escalated": 0.35,
+    "silent_wrong": 0.0,
+    "accuracy_when_decided": 1.0,
+    "auc_image_clip": 0.9475111111111111,
+    "auc_image_dl": 0.9248,
+    "auc_image_modern": 0.9053333333333334
+  },
+  "agent_test_ffpp_seen_v2": {
+    "n": 300,
+    "auc": 0.9260444444444444,
+    "fakes_called_authentic": 0.0,
+    "fakes_called_synthetic": 0.52,
+    "real_called_synthetic": 0.006666666666666667,
+    "escalated": 0.6433333333333333,
+    "silent_wrong": 0.0,
+    "accuracy_when_decided": 0.9907407407407407,
+    "auc_image_clip": 0.8083555555555556,
+    "auc_image_dl": 0.9246222222222223,
+    "auc_image_modern": 0.5566888888888889
+  },
+  "agent_test_ffpp_unseen_v2": {
+    "n": 300,
+    "auc": 0.7698666666666668,
+    "fakes_called_authentic": 0.04666666666666667,
+    "fakes_called_synthetic": 0.04,
+    "real_called_synthetic": 0.006666666666666667,
+    "escalated": 0.8533333333333334,
+    "silent_wrong": 0.1590909090909091,
+    "accuracy_when_decided": 0.8222222222222222,
+    "auc_image_clip": 0.6672888888888888,
+    "auc_image_dl": 0.7638222222222224,
+    "auc_image_modern": 0.5282888888888889
+  },
+  "agent_test_openfake_v2": {
+    "n": 1250,
+    "auc": 0.8900796425945707,
+    "fakes_called_authentic": 0.0180623973727422,
+    "fakes_called_synthetic": 0.5172413793103449,
+    "real_called_synthetic": 0.0078003120124804995,
+    "escalated": 0.936,
+    "silent_wrong": 0.15,
+    "accuracy_when_decided": 0.9546742209631728,
+    "auc_image_clip": 0.5410778007474978,
+    "auc_image_dl": 0.45511426368384794,
+    "auc_image_modern": 0.9167813017939437
+  }
+}

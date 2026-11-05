@@ -2,7 +2,7 @@
 
     python eval/score_agent_images.py --set calib      # calibration mix (DFF valid + OpenFake tiny train/val) -> eval/cache/agent_calib
     python eval/score_agent_images.py --set tests      # held-out tests -> eval/cache/agent_test_<name>
-The VLM judge is switched off (no key); tools used: dl, clip, modern.
+The VLM judge is switched off (no key); tools used: dl, clip, modern, edit. Output dirs get --suffix (default _v2) so old caches are never mixed.
 """
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ import os
 import sys
 from pathlib import Path
 
-os.environ["ENABLED_IMAGE_TOOLS"] = "dl,clip,modern"
+os.environ["ENABLED_IMAGE_TOOLS"] = "dl,clip,modern,edit"
 os.environ["SKIP_FORENSICS"] = "1"
 os.environ["GEMINI_API_KEY"] = ""
 os.environ["ANTHROPIC_API_KEY"] = ""
@@ -70,9 +70,11 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--set", choices=["calib", "tests"], required=True)
     ap.add_argument("--n", type=int, default=150)
+    ap.add_argument("--suffix", default="_v2")
     a = ap.parse_args()
     for name, samples in build_sets(a.set, a.n).items():
-        score(samples, Path("eval/cache") / name)
+        uniq = list({x["id"]: x for x in samples}.values())          # dedupe: identical ids would double-count
+        score(uniq, Path("eval/cache") / (name + a.suffix))
 
 
 if __name__ == "__main__":

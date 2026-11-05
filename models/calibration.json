@@ -37,15 +37,15 @@
       "t_star": 0.8855405391287756
     },
     "image": {
-      "t_lo": 0.06135879887155166,
-      "t_hi": 0.8067143655582364,
-      "t_star": 0.42361404502160366
+      "t_lo": 0.0653713385036106,
+      "t_hi": 0.8296953653306642,
+      "t_star": 0.4183215689873961
     }
   },
   "spread_threshold": 0.35,
   "spread_min_weight": 0.3,
   "min_tool_confidence": 0.15,
-  "calibrated_at": "2026-11-05T16:01:26.519920+00:00",
+  "calibrated_at": "2026-11-05T17:44:23.705915+00:00",
   "calibrated_modalities": [
     "image",
     "text"
@@ -54,18 +54,23 @@
   "stack": {
     "image": {
       "coef": {
-        "image_dl": 0.9010685262151833,
-        "image_clip": 0.379885553520771,
-        "image_modern": 0.27131006083812514
+        "image_dl": 0.738846595497733,
+        "image_clip": 0.27089916199727254,
+        "image_modern": 0.27567411856119745,
+        "image_edit": 0.19803490125774068
       },
       "present": {
-        "image_dl": 0.7952627869659448,
-        "image_clip": 0.795262786965946,
-        "image_modern": 0.21801427001809393
+        "image_dl": 0.6592105223123316,
+        "image_clip": 0.6592105223123316,
+        "image_modern": 0.08232947264429419,
+        "image_edit": 0.08232947264429419
       },
-      "bias": 0.22278318207590744,
-      "fitted_on": "agent_calib",
-      "n": 3496
+      "positive_only": [
+        "image_edit"
+      ],
+      "bias": 0.08502011405958528,
+      "fitted_on": "agent_calib_v2",
+      "n": 2498
     }
   }
 }

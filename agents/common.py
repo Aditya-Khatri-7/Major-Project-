@@ -1,3 +1,4 @@
+# ruff: noqa: E501
 """Small helpers shared by the agents."""
 from __future__ import annotations
 
@@ -14,7 +15,7 @@ from observability import get_logger, log_event
 log = get_logger("agents")
 
 TEXT_TOOL_NAMES = {"dl": "text_dl", "slm": "text_slm", "llm": "text_llm"}
-IMAGE_TOOL_NAMES = {"dl": "image_dl", "clip": "image_clip", "general": "image_general", "modern": "image_modern", "vlm": "image_vlm"}
+IMAGE_TOOL_NAMES = {"dl": "image_dl", "clip": "image_clip", "general": "image_general", "modern": "image_modern", "edit": "image_edit", "vlm": "image_vlm"}
 JUDGE_TOOLS = {"text": "text_llm", "image": "image_vlm"}
 
 

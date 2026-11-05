@@ -154,3 +154,26 @@ Trade-off: fewer false accusations everywhere, but more AI text slips through wh
 AUC near 0.5 is chance. The sliding-window "localised region" indicator fired on 12% of unedited images and 19% of edited ones, so it is labelled EXPERIMENTAL and kept out of the verdict summary. Catching small alterations needs a model trained for it (patch/pixel level on inpainting data with masks); 2,400 training edits are being generated for that.
 
 **Still weak:** images with metadata stripped (screenshots, re-uploads) rely on the detectors alone; fusion weights for `image_modern` are being recalibrated on a mix of face-deepfake and OpenFake images.
+
+## Round 6: user's own images, edit localiser, rebuilt caches
+
+**Trigger:** the user's real test (bedroom = AI-generated, street = real) failed: the bedroom was not caught. Cause: no detector in the stack covered modern generators or small local AI edits, and the report could not say *where*.
+
+**Changes:** (1) `image_modern` (SwinV2) for modern generators; (2) C2PA Content Credentials parsing; (3) `image_edit`, a pixel-level DeepLabV3 localiser trained on Stable Diffusion inpainting edits with exact masks; (4) evidence report now lists findings with strength/direction and an evidence map built from the localiser (regions, area share, peak probability) plus stated limits.
+
+**Cache bug (honest note):** the first attempt to add `image_edit` to the fusion made results *worse*. Cause: score caches held duplicated and mismatched ids. All caches were rebuilt (`*_v2`, 4 tools, unique ids; calibration n=2424, tests 300 each, OpenFake 1250) and both stacks refit and tested on the same data.
+
+| Test set (AUC / escalated / silent wrong) | 3 tools | 4 tools (shipped) |
+|---|---|---|
+| DFF inpainting | 0.939 / 51% / 4.1% | 0.967 / 44% / 1.8% |
+| DFF text-to-image | 0.990 / 35% / 0% | 0.994 / 28% / 0% |
+| DFF insight (swap) | 0.929 / 46% / 4.9% | 0.930 / 44% / 4.8% |
+| Celeb-DF | 0.998 / 35% / 0% | 0.997 / 29% / 0% |
+| FF++ seen / unseen | 0.926 / 0.770 | 0.923 / 0.760 |
+| OpenFake | 0.890 / 94% / 15% | 0.884 / 70% / 5.2% |
+
+The localiser helps for AI edits and generated images, is neutral on face swaps (it cannot see them), and slightly worse on FF++ unseen. Overall: fewer escalations and fewer silent errors, at near-equal AUC.
+
+**User's images:** bedroom with credentials: synthetic 0.90 (provenance + localiser flags 2.7% region); bedroom with metadata stripped: synthetic 0.67 (fused 0.83, localiser peak 0.99, region box reported); street: uncertain (fused 0.26), not accused. Smoke 40/40, pytest 83/83.
+
+**Still weak:** FF++ unseen face-swap video (AUC 0.76, 17% silent wrong); localiser untested on non-Stable-Diffusion editors, blind to face swaps, ~9% false flags after JPEG q75; the real street photo is escalated rather than confirmed authentic; this is one bedroom image, not a benchmark.

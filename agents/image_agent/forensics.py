@@ -180,13 +180,13 @@ def detector_heatmap(img, frac: float = 0.4, stride: float = 0.15) -> np.ndarray
 
 
 # ------------------------------------------------------------------ regions + report
-def top_regions(heat: np.ndarray, rel_thresh: float = 0.5, k: int = 3, min_frac: float = 0.01) -> list[dict]:
+def top_regions(heat: np.ndarray, rel_thresh: float = 0.5, k: int = 3, min_frac: float = 0.01, abs_thresh: Optional[float] = None) -> list[dict]:
     """Connected hot regions of a map as boxes in relative image coordinates (0..1). `rel_thresh` is a share of the way from median to max."""
     import cv2
     lo, hi = float(np.median(heat)), float(heat.max())
-    if hi - lo < 1e-6:
+    if hi - lo < 1e-6 or (abs_thresh is not None and hi < abs_thresh):
         return []
-    mask = (heat >= lo + rel_thresh * (hi - lo)).astype(np.uint8)
+    mask = (heat >= (abs_thresh if abs_thresh is not None else lo + rel_thresh * (hi - lo))).astype(np.uint8)
     n, lab, stats, _ = cv2.connectedComponentsWithStats(mask, connectivity=8)
     H, W = heat.shape
     regs = []
@@ -199,11 +199,11 @@ def top_regions(heat: np.ndarray, rel_thresh: float = 0.5, k: int = 3, min_frac:
     return sorted(regs, key=lambda r: r["mean_score"] * r["area_share"] ** 0.5, reverse=True)[:k]
 
 
-def render_overlay(img, heat: np.ndarray, out_path: str, regions: list[dict]) -> str:
+def render_overlay(img, heat: np.ndarray, out_path: str, regions: list[dict], fixed_scale: bool = False) -> str:
     import cv2
     from PIL import Image, ImageDraw
     h = cv2.resize(heat, img.size, interpolation=cv2.INTER_CUBIC)
-    h = np.clip((h - h.min()) / (h.max() - h.min() + 1e-6), 0, 1)
+    h = np.clip(h, 0, 1) if fixed_scale else np.clip((h - h.min()) / (h.max() - h.min() + 1e-6), 0, 1)
     color = cv2.applyColorMap((h * 255).astype(np.uint8), cv2.COLORMAP_JET)[:, :, ::-1]
     over = Image.fromarray((0.55 * np.asarray(img.convert("RGB")) + 0.45 * color).astype(np.uint8))
     d = ImageDraw.Draw(over)
@@ -231,21 +231,25 @@ def analyse(path: str, out_dir: Optional[str] = None, face_box: Optional[list[fl
     try:
         with Image.open(path) as im:
             img = ImageOps.exif_transpose(im).convert("RGB")
-        heat = detector_heatmap(img)
-        result["maps"]["detector"] = {"max": round(float(heat.max()), 3), "median": round(float(np.median(heat)), 3)}
-        regs = top_regions(heat)
+        from agents.image_agent.tools.edit_localizer import prob_map
+        heat = prob_map(img)                                   # P(pixel was AI-edited/synthesised), validated pixel-level localiser
+        area = float((heat >= 0.5).mean())
+        result["maps"]["edit"] = {"max": round(float(heat.max()), 3), "edited_area": round(area, 4)}
+        regs = top_regions(heat, abs_thresh=0.5)
         result["regions"] = regs
-        result["evidence_map_file"] = Path(render_overlay(img, heat, str(out_dir / "evidence_map.png"), regs)).name
-        spread = float(heat.max() - np.median(heat))
-        if heat.max() >= 0.8 and spread >= 0.25 and regs:
+        result["evidence_map_file"] = Path(render_overlay(img, heat, str(out_dir / "evidence_map.png"), regs, fixed_scale=True)).name
+        if regs and area >= 0.005:
             r = regs[0]
-            result["findings"].append({"id": "localised_synthetic_region", "strength": "weak", "direction": "experimental", "region": r["box"],
-                                       "text": f"EXPERIMENTAL: one region scores higher than the rest of the image (peak {heat.max():.2f} vs median {np.median(heat):.2f}; region 1 on the evidence map). "
-                                               "Not validated: on our test set this indicator fired on 12% of unedited photos and found only 19% of local AI edits, "
-                                               "and edits under 25% of the image were located at near-chance rates. Do not treat as proof of editing."})
-        elif np.median(heat) >= 0.7:
-            result["findings"].append({"id": "uniformly_synthetic", "strength": "moderate", "direction": "synthetic",
-                                       "text": f"The detector rates the whole image as likely AI-generated (median window score {np.median(heat):.2f}); no single region stands out."})
+            big = area > 0.6
+            result["findings"].append({
+                "id": "ai_edit_pixels" if not big else "mostly_synthetic_pixels", "strength": "strong" if heat.max() >= 0.9 else "moderate",
+                "direction": "synthetic", "region": r["box"],
+                "text": (f"The edit localiser marks {area * 100:.1f}% of the image as AI-generated/edited pixels (peak probability {heat.max():.2f}); "
+                         f"the largest region is shown as region 1 on the evidence map. " if not big else
+                         f"The edit localiser marks {area * 100:.0f}% of the image as synthetic pixels, i.e. most of the picture rather than one edit. ")
+                        + "Validated on Stable-Diffusion-style inpainting and text-to-image (about 97% / 91% flagged, 0.7% of clean photos flagged). "
+                          "Limits: not validated on other editors (Photoshop generative fill, Flux, GPT-image); does not detect face swaps; "
+                          "clean photos re-saved at JPEG q75 are flagged about 9% of the time."})
         nz = noise_inconsistency_map(img)
         zmax = float(np.percentile(nz, 99))
         result["maps"]["noise_p99_z"] = round(zmax, 2)

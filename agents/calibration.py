@@ -21,8 +21,9 @@ DEFAULTS: dict = {
     "image_clip": {"temperature": 1.0},
     "image_general": {"temperature": 1.0},
     "image_modern": {"temperature": 1.0},
+    "image_edit": {"temperature": 1.0},
     "weights": {"text_dl": 1.0, "text_slm": 1.0, "text_llm": 1.0, "image_dl": 1.0, "image_clip": 1.0, "image_general": 1.0,
-                "image_modern": 1.0, "image_vlm": 1.0},
+                "image_modern": 1.0, "image_edit": 1.0, "image_vlm": 1.0},
     "thresholds": {
         "text": {"t_lo": 0.35, "t_hi": 0.65, "t_star": 0.5},
         "image": {"t_lo": 0.35, "t_hi": 0.65, "t_star": 0.5},
@@ -69,7 +70,7 @@ def sigmoid(x: float) -> float:
 
 def tool_probability(tool_name: str, raw: dict, cal: dict) -> Optional[float]:
     """Calibrated P(AI) from a tool's raw output, or None if the tool has no calibration model."""
-    if tool_name in ("text_dl", "image_dl", "image_clip", "image_general", "image_modern") and "raw_logit" in raw:
+    if tool_name in ("text_dl", "image_dl", "image_clip", "image_general", "image_modern", "image_edit") and "raw_logit" in raw:
         temperature = max(float(cal[tool_name].get("temperature", 1.0)), 1e-3)
         return sigmoid(float(raw["raw_logit"]) / temperature)
     if tool_name == "text_slm" and "binoculars_score" in raw:

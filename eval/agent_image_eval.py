@@ -19,7 +19,7 @@ from agents.fusion import fuse  # noqa: E402
 from eval.cache import load_cache  # noqa: E402
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--tools", default="image_dl,image_clip,image_modern")
+ap.add_argument("--tools", default="image_dl,image_clip,image_modern,image_edit")
 ap.add_argument("--out", type=Path, default=None)
 ap.add_argument("--glob", default="agent_test_*")
 a = ap.parse_args()

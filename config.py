@@ -40,7 +40,7 @@ class Settings(BaseSettings):
 
     # --- runtime switches (also used for ablations) ---
     enabled_text_tools: str = "dl,slm,llm"
-    enabled_image_tools: str = "dl,clip,general,vlm"
+    enabled_image_tools: str = "dl,clip,modern,edit,vlm"
     enable_reflexion: bool = True
     image_tta: bool = False
 

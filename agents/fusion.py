@@ -70,7 +70,10 @@ def fuse(verdicts: list[ToolVerdict], modality: str, n_words: int = 0, cfg: Opti
         for name, coef in stack["coef"].items():
             v = next((u for u in verdicts if u.tool_name == name and not u.error and "raw_logit" in u.raw_features), None)
             if v is not None:
-                z += float(coef) * float(v.raw_features["raw_logit"]) + float(stack["present"][name])
+                x = float(v.raw_features["raw_logit"])
+                if name in stack.get("positive_only", ()):
+                    x = max(x, 0.0)             # only 'traces found' counts as evidence
+                z += float(coef) * x + float(stack["present"][name])
         fused = sigmoid(z)
         notes.append("Image score from the learned tool combination (see models/calibration.json 'stack').")
     # Disagreement is judged among tools that carry real weight; advisory (low-weight) tools are only mentioned.

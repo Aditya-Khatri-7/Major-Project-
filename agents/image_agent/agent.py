@@ -11,10 +11,10 @@ from observability import log_event
 
 
 def _runners() -> dict:
-    from agents.image_agent.tools import clip_probe, dl_classifier, general_probe, modern_detector, vlm_judge
+    from agents.image_agent.tools import clip_probe, dl_classifier, edit_localizer, general_probe, modern_detector, vlm_judge
 
     return {"dl": dl_classifier.score_image, "clip": clip_probe.score_image, "general": general_probe.score_image,
-            "modern": modern_detector.score_image, "vlm": vlm_judge.score_image}
+            "modern": modern_detector.score_image, "edit": edit_localizer.score_image, "vlm": vlm_judge.score_image}
 
 
 SCOPE_THRESHOLD = 0.5
