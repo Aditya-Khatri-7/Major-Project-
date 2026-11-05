@@ -177,3 +177,10 @@ The localiser helps for AI edits and generated images, is neutral on face swaps 
 **User's images:** bedroom with credentials: synthetic 0.90 (provenance + localiser flags 2.7% region); bedroom with metadata stripped: synthetic 0.67 (fused 0.83, localiser peak 0.99, region box reported); street: uncertain (fused 0.26), not accused. Smoke 40/40, pytest 83/83.
 
 **Still weak:** FF++ unseen face-swap video (AUC 0.76, 17% silent wrong); localiser untested on non-Stable-Diffusion editors, blind to face swaps, ~9% false flags after JPEG q75; the real street photo is escalated rather than confirmed authentic; this is one bedroom image, not a benchmark.
+
+## Round 7: per-generator breakdown and WhatsApp-style degradation (OpenFake test, n=1250 / degraded n=400)
+
+Fakes called synthetic by generator: illustrious 91%, lumina 100%, aurora 83%, midjourney-7 82%, wan-video 81%, gpt-image-1.5 75%, recraft-v3 64%, veo-3 64%, **z-image-turbo 44% (53% uncertain)**, **flux.2-klein 8% (86% uncertain, 6% called authentic)**.
+Real photos: only 2-7% confirmed authentic, 92-98% "uncertain" (never accused: 0-1% called synthetic).
+After resize to 1280 px + JPEG q70: AUC 0.884 -> 0.839; fakes called synthetic 55% -> 40%; fakes called authentic 2.3% -> 3.8%; silent wrong 5.2% -> 7.7%. Only `image_modern` survives (AUC 0.89); the face CNN and CLIP are near chance on these images.
+Conclusion: modern generators Flux and Z-Image, and compressed images, are the main gaps; the system is also too timid on real photos. Script: `eval/score_degraded.py`.
