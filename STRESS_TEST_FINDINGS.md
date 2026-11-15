@@ -184,3 +184,9 @@ Fakes called synthetic by generator: illustrious 91%, lumina 100%, aurora 83%, m
 Real photos: only 2-7% confirmed authentic, 92-98% "uncertain" (never accused: 0-1% called synthetic).
 After resize to 1280 px + JPEG q70: AUC 0.884 -> 0.839; fakes called synthetic 55% -> 40%; fakes called authentic 2.3% -> 3.8%; silent wrong 5.2% -> 7.7%. Only `image_modern` survives (AUC 0.89); the face CNN and CLIP are near chance on these images.
 Conclusion: modern generators Flux and Z-Image, and compressed images, are the main gaps; the system is also too timid on real photos. Script: `eval/score_degraded.py`.
+
+## Round 8: fine-tuning the modern-generator detector (not shipped)
+
+Fine-tuned SwinV2 (`training/finetune_modern.py`, data `data/build_openfake_train.py`: 18k OpenFake images from separate train shards, JPEG/resize augmentation, Flux/Veo/Recraft oversampled). Only epoch 0 of 2 finished (session interrupted); weights in `models/modern_detector_v2` (git-ignored), selectable via env `MODERN_MODEL_DIR`.
+Held-out OpenFake test (Flux.2-klein-9b and Z-Image never seen in training): AUC clean 0.917 -> 0.928, degraded (1280 px, JPEG q70) 0.890 -> 0.908. Fake recall at 5% false alarms is unchanged (75% / 69% -> 75% / 68%); flux.2-klein 31% -> 42%, gpt-image-1.5 94% -> 85%.
+Conclusion: small gain, no clear win; the detector is limited by unseen generators and by real-photo domain shift (train reals laion/pexels vs test imagenet/docci), not by compression augmentation. Not installed.

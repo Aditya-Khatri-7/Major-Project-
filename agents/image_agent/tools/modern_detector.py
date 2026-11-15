@@ -6,6 +6,7 @@ AUROC 0.91 where the old general probe scored 0.38. Weights live in models/moder
 """
 from __future__ import annotations
 
+import os
 import threading
 from pathlib import Path
 
@@ -13,7 +14,7 @@ from agents.calibration import load_calibration, tool_confidence, tool_probabili
 from agents.schemas import ToolVerdict
 
 TOOL_NAME = "image_modern"
-MODEL_DIR = Path("models/modern_detector")
+MODEL_DIR = Path(os.environ.get("MODERN_MODEL_DIR", "models/modern_detector"))
 _lock = threading.Lock()
 _loaded: dict = {}
 
